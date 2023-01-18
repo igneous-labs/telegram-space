@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="telegram-space-client"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://src/scenes/main.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-NetworkHandler="*res://singletons/network_handler.gd"
+NetworkHandler="*res://src/singletons/network_handler.gd"
 
 [editor]
 

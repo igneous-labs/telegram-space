@@ -1,13 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://cciokvswu3owu"]
 
-[ext_resource type="PackedScene" uid="uid://b4o7d72albudw" path="res://scenes/character.tscn" id="1_6ba8k"]
-[ext_resource type="Script" path="res://scenes/player.gd" id="2_dmaqf"]
+[ext_resource type="PackedScene" uid="uid://b4o7d72albudw" path="res://src/scenes/character.tscn" id="1_yfm4p"]
+[ext_resource type="Script" path="res://src/scenes/player.gd" id="2_60fwp"]
 
-[node name="CharacterBody2D" instance=ExtResource("1_6ba8k")]
-script = ExtResource("2_dmaqf")
+[node name="CharacterBody2D" instance=ExtResource("1_yfm4p")]
+script = ExtResource("2_60fwp")
 
 [node name="Sprite2D" parent="." index="1"]
-frame = 36
+frame = 42
 
 [node name="Camera2D" type="Camera2D" parent="." index="3"]
 current = true

@@ -1,7 +1,7 @@
 extends Node2D
 
-const Player := preload("res://scenes/player.tscn")
-const RemotePlayer := preload("res://scenes/remote_player.tscn")
+const Player := preload("res://src/scenes/player.tscn")
+const RemotePlayer := preload("res://src/scenes/remote_player.tscn")
 
 func _ready() -> void:
     self.spawn_player()

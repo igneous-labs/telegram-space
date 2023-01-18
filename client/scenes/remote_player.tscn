@@ -1,7 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://deis45khayirx"]
-
-[ext_resource type="PackedScene" uid="uid://b4o7d72albudw" path="res://scenes/character.tscn" id="1_ly1bo"]
-[ext_resource type="Script" path="res://scenes/remote_player.gd" id="2_71dxa"]
-
-[node name="CharacterBody2D" instance=ExtResource("1_ly1bo")]
-script = ExtResource("2_71dxa")

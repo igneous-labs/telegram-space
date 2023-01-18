@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://c0mc103w1lqud"]
+
+[ext_resource type="Script" path="res://scenes/main.gd" id="1_475ri"]
+[ext_resource type="PackedScene" uid="uid://cv35dfbsfrhps" path="res://scenes/level.tscn" id="2_80do0"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_475ri")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Level" parent="World" instance=ExtResource("2_80do0")]
+scale = Vector2(2, 2)
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0

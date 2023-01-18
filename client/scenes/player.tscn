@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://cciokvswu3owu"]
+
+[ext_resource type="PackedScene" uid="uid://b4o7d72albudw" path="res://scenes/character.tscn" id="1_6ba8k"]
+[ext_resource type="Script" path="res://scenes/player.gd" id="2_dmaqf"]
+
+[node name="CharacterBody2D" instance=ExtResource("1_6ba8k")]
+script = ExtResource("2_dmaqf")
+
+[node name="Sprite2D" parent="." index="1"]
+frame = 36
+
+[node name="Camera2D" type="Camera2D" parent="." index="3"]
+current = true
+position_smoothing_enabled = true
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+drag_left_margin = 0.1
+drag_top_margin = 0.1
+drag_right_margin = 0.1
+drag_bottom_margin = 0.1

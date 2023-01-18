@@ -1,30 +1,36 @@
 extends CharacterBody2D
 
 const SPEED: float = 200.0
-@export var animation_dir := &"right"
+@export var animation_dir := Common.Direction.LEFT
 @export var animation_state := &"idle"
 
-func _physics_process(_delta):
-    var dir = Vector2(Input.get_axis("ui_left", "ui_right"), Input.get_axis("ui_up", "ui_down")).normalized()
-    self.velocity = SPEED * dir
-    if dir.length() != 0:
+func _physics_process(_delta: float) -> void:
+    var input_vector := Vector2(
+        Input.get_axis("ui_left", "ui_right"),
+        Input.get_axis("ui_up", "ui_down")
+    ).normalized()
+    self.velocity = SPEED * input_vector
+    if input_vector.length() != 0:
         self.animation_state = &"walk"
-        match Vector2i(dir):
-            Vector2i.LEFT:
-                self.animation_dir = &"left"
-            Vector2i.RIGHT:
-                self.animation_dir = &"right"
-            Vector2i.UP:
-                self.animation_dir = &"up"
-            Vector2i.DOWN:
-                self.animation_dir = &"down"
+        self.animation_dir = Common.vec_to_dir(input_vector)
     else:
         self.animation_state = &"idle"
     update_animation()
+    publish_player_state()
     move_and_slide()
 
-func update_animation():
-    $AnimationPlayer.play(&"%s-%s" % [self.animation_state, self.animation_dir])
+func publish_player_state() -> void:
+    NetworkHandler.publish_player_state({
+        "position": self.position,
+        "direction": self.animation_dir,
+        "velocity": self.velocity,
+    })
 
-func setup(initial_position: Vector2):
+func update_animation() -> void:
+    $AnimationPlayer.play(&"%s-%s" % [
+        self.animation_state,
+        Common.dir_to_strn(self.animation_dir),
+    ])
+
+func setup(initial_position: Vector2) -> void:
     self.position = initial_position

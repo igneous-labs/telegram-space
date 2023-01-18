@@ -1,6 +1,5 @@
+# Defines types related to messaging protocol
 class_name Protocol
-
-# for binary packing character animation type
 
 enum MessageType {
     # state = {

@@ -1,3 +1,5 @@
+# (Local) Player implements user controlled character
+# Inherits character
 extends CharacterBody2D
 
 const SPEED: float = 200.0
@@ -15,9 +17,9 @@ func _physics_process(_delta: float) -> void:
         self.animation_dir = Common.vec_to_dir(input_vector)
     else:
         self.animation_state = &"idle"
-    update_animation()
-    publish_player_state()
-    move_and_slide()
+    self.update_animation()
+    self.publish_player_state()
+    self.move_and_slide()
 
 func publish_player_state() -> void:
     NetworkHandler.publish_player_state({

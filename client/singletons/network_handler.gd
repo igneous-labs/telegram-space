@@ -1,3 +1,4 @@
+# NetworkHandler singleton (autoloaded)
 extends Node
 
 var websocket := WebSocketPeer.new()

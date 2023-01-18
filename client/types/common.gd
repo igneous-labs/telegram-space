@@ -1,3 +1,4 @@
+# Defines common types shared across files
 class_name Common
 
 enum Direction {

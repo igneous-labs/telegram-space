@@ -5,26 +5,26 @@ enum MessageType {
     # state = {
     #   position: Vector2,
     #   direction: Direction,
-    #   velocity: Vector2,
+    #   status: CharacterStatus,
     # }
-    # payload = [position.x, position.y, direction, velocity.x, velocity.y]
+    # payload = [position, direction, status]
     PLAYER_STATE = 0,
 }
 
 static func serialize_message(type: MessageType, data: Dictionary) -> PackedByteArray:
+    var payload := PackedByteArray()
     match type:
         MessageType.PLAYER_STATE:
-            return PackedByteArray([
-                MessageType.PLAYER_STATE,
-                data.position.x,
-                data.position.y,
-                data.direction,
-                data.velocity.x,
-                data.velocity.y,
-            ])
+            payload.resize(15)
+            payload.encode_u8(0, MessageType.PLAYER_STATE)  # 1 byte;   (1)
+            payload.encode_var(1, data.position)            # 12 bytes; (13)
+            payload.encode_u8(13, data.direction)           # 1 byte;   (14)
+            payload.encode_u8(14, data.status)              # 1 byte;   (15)
         _:
             # This should never happen
-            return PackedByteArray()
+            push_error("given message type is not in the type of MessageType")
+    #print("payload length: ", len(payload), "; payload: ", payload)
+    return payload
 
 static func deserialize_message(payload: PackedByteArray) -> Dictionary:
     # TODO
@@ -38,4 +38,5 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
             }
         _:
             # This should never happen
+            push_error("given payload does not contain a valid message")
             return {}

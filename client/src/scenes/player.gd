@@ -1,10 +1,8 @@
 # (Local) Player implements user controlled character
 # Inherits character
-extends CharacterBody2D
+extends "res://src/scenes/character.gd"
 
-const SPEED: float = 200.0
-@export var animation_dir := Common.Direction.LEFT
-@export var animation_state := &"idle"
+const SPEED: float = 200.
 
 func _physics_process(_delta: float) -> void:
     var input_vector := Vector2(
@@ -12,11 +10,7 @@ func _physics_process(_delta: float) -> void:
         Input.get_axis("ui_up", "ui_down")
     ).normalized()
     self.velocity = SPEED * input_vector
-    if input_vector.length() != 0:
-        self.animation_state = &"walk"
-        self.animation_dir = Common.vec_to_dir(input_vector)
-    else:
-        self.animation_state = &"idle"
+    self.update_character_state(input_vector)
     self.update_animation()
     self.publish_player_state()
     self.move_and_slide()
@@ -24,15 +18,6 @@ func _physics_process(_delta: float) -> void:
 func publish_player_state() -> void:
     NetworkHandler.publish_player_state({
         "position": self.position,
-        "direction": self.animation_dir,
-        "velocity": self.velocity,
+        "direction": self.character_direction,
+        "status": self.character_status,
     })
-
-func update_animation() -> void:
-    $AnimationPlayer.play(&"%s-%s" % [
-        self.animation_state,
-        Common.dir_to_strn(self.animation_dir),
-    ])
-
-func setup(initial_position: Vector2) -> void:
-    self.position = initial_position

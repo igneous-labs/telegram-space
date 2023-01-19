@@ -5,22 +5,27 @@ var websocket := WebSocketPeer.new()
 const WEBSOCKET_URL := "ws://localhost:1337"
 
 var initialized := false
+# Server's identifier for client, received with ACKNOWLEDGE message (see types/protocol.gd)
+var client_id: int = -1
 
 func _ready() -> void:
-    var err = websocket.connect_to_url(WEBSOCKET_URL)
+    self.connect_websocket()
+
+func connect_websocket() -> void:
+    var err := websocket.connect_to_url(WEBSOCKET_URL)
     if err != OK:
         set_physics_process(false)
         print("failed to connect to %s" % WEBSOCKET_URL)
     else:
-        self.initialized = true
+        set_physics_process(true)
         print("connected to %s" % WEBSOCKET_URL)
 
-func _physics_process(_delta) -> void:
+func _physics_process(_delta: float) -> void:
     websocket.poll()
     match websocket.get_ready_state():
         WebSocketPeer.STATE_OPEN:
             while websocket.get_available_packet_count():
-                print("Packet: ", websocket.get_packet())
+                self.handle_message(websocket.get_packet())
         WebSocketPeer.STATE_CLOSING:
             # Keep polling to achieve proper close.
             pass
@@ -32,7 +37,21 @@ func _physics_process(_delta) -> void:
                 reason,
                 code != -1,
             ])
+            self.initialized = false
             set_physics_process(false) # Stop processing.
+
+func handle_message(payload: PackedByteArray) -> void:
+    #print("Message payload: ", payload)
+    var message = Protocol.deserialize_message(payload)
+    match message.type:
+        Protocol.MessageType.ACKNOWLEDGE:
+            self.client_id = message.data.client_id
+            self.initialized = true
+        Protocol.MessageType.WORLD_STATE:
+            # TODO: to be implemented after server-side world state generation and broadcasting
+            print("world state message: ", message)
+        _:
+            print("Unhandled message: ", message)
 
 func publish_player_state(state: Dictionary) -> void:
     if not self.initialized:

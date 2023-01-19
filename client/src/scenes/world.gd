@@ -5,6 +5,7 @@ const RemotePlayer := preload("res://src/scenes/remote_player.tscn")
 
 func _ready() -> void:
     self.spawn_player()
+    # DELETEME: used for testing remote player scene
     self.spawn_remote_player()
 
 func spawn_remote_player() -> void:

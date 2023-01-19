@@ -2,13 +2,22 @@
 class_name Protocol
 
 enum MessageType {
+    # NOTE: not sure how client_id should be securely
+    #       generated and passed, so for now server assigns client_id
+    #       and passes it back on connection as a ACKNOWLEDGE message
+    # server -> client only
+    # payload = [type (1), client_id(8)]
+    ACKNOWLEDGE = 0,
+    
+    # client -> server only
     # state = {
     #   position: Vector2,
-    #   direction: Direction,
-    #   status: CharacterStatus,
+    #   direction: Common.Direction,
+    #   status: Common.CharacterStatus,
     # }
-    # payload = [position, direction, status]
-    PLAYER_STATE = 0,
+    # payload = [type (1), position (12), direction (1), status (1)]
+    PLAYER_STATE = 1,
+    WORLD_STATE = 2,
 }
 
 static func serialize_message(type: MessageType, data: Dictionary) -> PackedByteArray:
@@ -27,14 +36,23 @@ static func serialize_message(type: MessageType, data: Dictionary) -> PackedByte
     return payload
 
 static func deserialize_message(payload: PackedByteArray) -> Dictionary:
-    # TODO
-    var type = payload[0];
+    var type = payload.decode_u8(0);
     match type:
         MessageType.PLAYER_STATE:
             return {
-                "position": Vector2(),
-                "direction": Common.Direction.RIGHT,
-                "velocity": Vector2(),
+                "type": MessageType.PLAYER_STATE,
+                "data": {
+                    "position": payload.decode_var(1),
+                    "direction": payload.decode_u8(13),
+                    "status": payload.decode_u8(14),
+                },
+            }
+        MessageType.ACKNOWLEDGE:
+            return {
+                "type": MessageType.ACKNOWLEDGE,
+                "data": {
+                    "client_id": payload.decode_u64(1),
+                },
             }
         _:
             # This should never happen

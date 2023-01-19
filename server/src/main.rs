@@ -1,7 +1,10 @@
-use simple_websockets::{Event, Responder};
+use simple_websockets::{Event, Responder, Message};
 use std::collections::HashMap;
 use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
+
+mod protocol;
+use protocol::MessageType;
 
 const PORT: u16 = 1337;
 
@@ -23,12 +26,19 @@ fn main() {
     loop {
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
-                info!("Client #{} connected", client_id);
+                info!("Client #{} connected, acknowledging.", client_id);
                 // add their Responder to our `clients` map:
-                clients.insert(client_id, responder);
+                clients.insert(client_id, responder.clone());
+
+                let message_type: u8 = MessageType::Acknowledge.into();
+                let payload = Message::Binary([
+                    message_type.to_le_bytes().to_vec(),
+                    client_id.to_le_bytes().to_vec()
+                ].concat());
+                responder.send(payload);
             },
             Event::Disconnect(client_id) => {
-                info!("Client #{} disconnected", client_id);
+                info!("Client #{} disconnected.", client_id);
                 // remove the disconnected client from the clients map:
                 clients.remove(&client_id);
             },

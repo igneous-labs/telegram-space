@@ -1,13 +1,25 @@
-use simple_websockets::{Event, Responder, Message};
-use std::collections::HashMap;
-use log::{info, LevelFilter};
+use log::{info, warn, LevelFilter};
 use simple_logger::SimpleLogger;
+use simple_websockets::{Event, Message, Responder};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
+};
 
 mod protocol;
-use protocol::MessageType;
+mod types;
+//mod state;
+
+use protocol::{ClientId, Message as ProtocolMessage, MessageType, PlayerStateData};
+use types::{Array, PackedByteArray};
 
 const PORT: u16 = 1337;
+const WORLD_STATE_BROADCAST_INTERVAL_MS: u64 = 20;
 
+// NOTE: client_id is downcasted from u64 to u16, and the implementation assumes that
+//       the max connection is kept at u16 max.
 fn main() {
     SimpleLogger::new()
         .with_level(LevelFilter::Off)
@@ -16,39 +28,102 @@ fn main() {
         .init()
         .unwrap();
 
-    let event_hub = simple_websockets::launch(PORT)
-        .expect("Failed to listen");
+    let event_hub = simple_websockets::launch(PORT).expect("Failed to listen");
+
+
+    // TODO: do message passing using state::StateService instead of resource sharing
+    let world_state: Arc<Mutex<HashMap<ClientId, PlayerStateData>>> =
+        Arc::new(Mutex::new(HashMap::new()));
 
     // map between client ids and the client's `Responder`:
-    let mut clients: HashMap<u64, Responder> = HashMap::new();
+    let clients: Arc<Mutex<HashMap<ClientId, Responder>>> = Arc::new(Mutex::new(HashMap::new()));
+
+    // broad cast world state
+    let sender_handle = {
+        let clients = clients.clone();
+        let world_state = world_state.clone();
+        thread::spawn(move || loop {
+            {
+                let clients = clients.lock().unwrap();
+                let world_state = world_state.lock().unwrap();
+                for (client_id, responder) in clients.iter() {
+                    //info!("sending world state to client_id: {}", client_id);
+                    let world_state_data: Vec<PackedByteArray> = world_state
+                        .iter()
+                        .map(
+                            |(&client_id, &player_state_data)| (&protocol::WorldStateEntry {
+                                client_id,
+                                player_state_data,
+                            }).into(),
+                        )
+                        .collect();
+                    if world_state_data.len() != 0 {
+                        let payload = Message::Binary(
+                            [
+                                u8::from(MessageType::WorldState).to_le_bytes().to_vec(),
+                                Array(world_state_data).into()
+                            ].concat(),
+                        );
+                        responder.send(payload);
+                    }
+                }
+            }
+            thread::sleep(Duration::from_millis(WORLD_STATE_BROADCAST_INTERVAL_MS));
+        })
+    };
 
     info!("Websocket echo server initialized");
     loop {
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
+                let client_id =
+                    ClientId::try_from(client_id).expect("max number of connection exceeded");
                 info!("Client #{} connected, acknowledging.", client_id);
                 // add their Responder to our `clients` map:
+                let mut clients = clients.lock().unwrap();
                 clients.insert(client_id, responder.clone());
 
-                let message_type: u8 = MessageType::Acknowledge.into();
-                let payload = Message::Binary([
-                    message_type.to_le_bytes().to_vec(),
-                    client_id.to_le_bytes().to_vec()
-                ].concat());
+                info!("# of clients: {}", clients.len());
+
+                let payload = Message::Binary(
+                    [
+                        u8::from(MessageType::Acknowledge).to_le_bytes().to_vec(),
+                        client_id.to_le_bytes().to_vec(),
+                    ]
+                    .concat(),
+                );
                 responder.send(payload);
-            },
+            }
             Event::Disconnect(client_id) => {
+                let client_id =
+                    ClientId::try_from(client_id).expect("max number of connection exceeded");
                 info!("Client #{} disconnected.", client_id);
                 // remove the disconnected client from the clients map:
+                let mut clients = clients.lock().unwrap();
                 clients.remove(&client_id);
-            },
-            Event::Message(client_id, message) => {
-                info!("Client #{} messaged: {:?}", client_id, message);
-                // retrieve this client's `Responder`:
-                let responder = clients.get(&client_id).unwrap();
-                // echo the message back:
-                responder.send(message);
-            },
+
+                info!("# of clients: {}", clients.len());
+
+                let mut world_state = world_state.lock().unwrap();
+                world_state.remove(&client_id);
+            }
+            Event::Message(client_id, Message::Binary(data)) => {
+                let client_id =
+                    ClientId::try_from(client_id).expect("max number of connection exceeded");
+                let msg = ProtocolMessage::try_from(data.as_slice()).unwrap();
+                //info!("Client #{} messaged: {:?}", client_id, msg);
+
+                // TODO: move this to StateService
+                if let ProtocolMessage::PlayerState(data) = msg {
+                    let mut world_state = world_state.lock().unwrap();
+                    world_state.insert(client_id, data);
+                }
+            }
+            unidentified_message => {
+                warn!("received unidentified message: {:?}", unidentified_message);
+            }
         }
     }
+
+    sender_handle.join().unwrap();
 }

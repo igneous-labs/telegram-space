@@ -49,7 +49,7 @@ func handle_message(payload: PackedByteArray) -> void:
             self.initialized = true
         Protocol.MessageType.WORLD_STATE:
             # TODO: to be implemented after server-side world state generation and broadcasting
-            print("world state message: ", message)
+            print("world state: ", message.data)
         _:
             print("Unhandled message: ", message)
 

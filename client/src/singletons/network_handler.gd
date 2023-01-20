@@ -1,6 +1,8 @@
 # NetworkHandler singleton (autoloaded)
 extends Node
 
+signal received_world_state(world_state: Dictionary)
+
 var websocket := WebSocketPeer.new()
 const WEBSOCKET_URL := "ws://localhost:1337"
 
@@ -48,8 +50,8 @@ func handle_message(payload: PackedByteArray) -> void:
             self.client_id = message.data.client_id
             self.initialized = true
         Protocol.MessageType.WORLD_STATE:
-            # TODO: to be implemented after server-side world state generation and broadcasting
-            print("world state: ", message.data)
+            message.data.erase(client_id)
+            emit_signal(&"received_world_state", message.data)
         _:
             print("Unhandled message: ", message)
 

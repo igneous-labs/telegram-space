@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://c0mc103w1lqud"]
+[gd_scene load_steps=6 format=3 uid="uid://c0mc103w1lqud"]
 
 [ext_resource type="Script" path="res://src/scenes/main.gd" id="1_20s2g"]
 [ext_resource type="Script" path="res://src/scenes/world.gd" id="2_ok88h"]
 [ext_resource type="PackedScene" uid="uid://cv35dfbsfrhps" path="res://src/scenes/level.tscn" id="3_8dtji"]
+[ext_resource type="Texture2D" uid="uid://ci8eple80gs31" path="res://assets/GC_D-Pad.png" id="4_5gj0m"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rog32"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_20s2g")
@@ -21,3 +24,24 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_lock_ = true
+
+[node name="GcD-pad" type="Sprite2D" parent="UI"]
+position = Vector2(74, 636)
+scale = Vector2(0.203333, 0.203333)
+texture = ExtResource("4_5gj0m")
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="UI"]
+position = Vector2(28, 633)
+shape = SubResource("RectangleShape2D_rog32")
+
+[node name="TouchScreenButton2" type="TouchScreenButton" parent="UI"]
+position = Vector2(118, 635)
+shape = SubResource("RectangleShape2D_rog32")
+
+[node name="TouchScreenButton3" type="TouchScreenButton" parent="UI"]
+position = Vector2(74, 597)
+shape = SubResource("RectangleShape2D_rog32")
+
+[node name="TouchScreenButton4" type="TouchScreenButton" parent="UI"]
+position = Vector2(73, 678)
+shape = SubResource("RectangleShape2D_rog32")

@@ -18,7 +18,14 @@ scale = Vector2(2, 2)
 
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 8
+metadata/_edit_lock_ = true
 
 [node name="DPadController" parent="UI" instance=ExtResource("4_uu07m")]
-position = Vector2(720, 435)
+offset = Vector2(740, 600)
+transform = Transform2D(1, 0, 0, 1, 740, 600)

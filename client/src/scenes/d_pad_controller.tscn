@@ -4,7 +4,7 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a8jt0"]
 
-[node name="DPadController" type="Node2D"]
+[node name="DPadController" type="CanvasLayer"]
 metadata/_edit_lock_ = true
 
 [node name="GcD-pad" type="Sprite2D" parent="."]

@@ -11,17 +11,11 @@ func update_animation() -> void:
         Common.dir_to_strn(self.character_direction),
     ])
 
-func update_character_state(input_vector: Vector2):
-    if input_vector.length() != 0:
-        self.character_status = Common.CharacterStatus.WALK
-        var dir = Common.vec_to_dir(input_vector)
-        if dir != Common.Direction.NONE:
-            self.character_direction = dir
-    else:
-        self.character_status = Common.CharacterStatus.IDLE
-
-func setup(initial_position: Vector2) -> void:
-    self.character_direction = Common.Direction.LEFT
-    self.character_status = Common.CharacterStatus.IDLE
-    self.position = initial_position
+func update_character_state(character_state: Dictionary) -> void:
+    self.character_direction = character_state.direction
+    self.character_status = character_state.status
+    self.position = character_state.position
     self.update_animation()
+
+func _setup(initial_state: Dictionary) -> void:
+    self.update_character_state(initial_state)

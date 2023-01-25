@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 NetworkHandler="*res://src/singletons/network_handler.gd"
-DPad="*res://src/singletons/DPad.tscn"
 
 [display]
 
@@ -28,6 +27,10 @@ window/size/viewport_height=1440
 [editor]
 
 export/convert_text_resources_to_binary=true
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [rendering]
 

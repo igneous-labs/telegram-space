@@ -1,23 +1,37 @@
 [gd_scene load_steps=3 format=3 uid="uid://cjepljfvuxfvn"]
 
-[ext_resource type="Texture2D" uid="uid://ci8eple80gs31" path="res://assets/GC_D-Pad.png" id="1_pgsjh"]
+[ext_resource type="Texture2D" uid="uid://ci8eple80gs31" path="res://assets/GC_D-Pad.png" id="1_twh4m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a8jt0"]
 
-[node name="DPad" type="Node2D"]
+[node name="DPadController" type="Node2D"]
+metadata/_edit_lock_ = true
 
 [node name="GcD-pad" type="Sprite2D" parent="."]
 scale = Vector2(0.203333, 0.203333)
-texture = ExtResource("1_pgsjh")
+texture = ExtResource("1_twh4m")
+metadata/_edit_lock_ = true
 
 [node name="DPadButtonLeft" type="TouchScreenButton" parent="."]
+position = Vector2(-44, 0)
 shape = SubResource("RectangleShape2D_a8jt0")
+action = "ui_left"
+metadata/_edit_lock_ = true
 
 [node name="DPadButtonRight" type="TouchScreenButton" parent="."]
+position = Vector2(44, 0)
 shape = SubResource("RectangleShape2D_a8jt0")
+action = "ui_right"
+metadata/_edit_lock_ = true
 
 [node name="DPadButtonUp" type="TouchScreenButton" parent="."]
+position = Vector2(0, -44)
 shape = SubResource("RectangleShape2D_a8jt0")
+action = "ui_up"
+metadata/_edit_lock_ = true
 
 [node name="DPadButtonDown" type="TouchScreenButton" parent="."]
+position = Vector2(0, 44)
 shape = SubResource("RectangleShape2D_a8jt0")
+action = "ui_down"
+metadata/_edit_lock_ = true

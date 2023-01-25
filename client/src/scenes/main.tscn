@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/scenes/main.gd" id="1_20s2g"]
 [ext_resource type="Script" path="res://src/scenes/world.gd" id="2_ok88h"]
 [ext_resource type="PackedScene" uid="uid://cv35dfbsfrhps" path="res://src/scenes/level.tscn" id="3_8dtji"]
-[ext_resource type="PackedScene" uid="uid://cjepljfvuxfvn" path="res://src/singletons/DPad.tscn" id="4_djgif"]
+[ext_resource type="PackedScene" uid="uid://cjepljfvuxfvn" path="res://src/scenes/d_pad_controller.tscn" id="4_uu07m"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_20s2g")
@@ -19,9 +19,6 @@ scale = Vector2(2, 2)
 [node name="UI" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-metadata/_edit_lock_ = true
 
-[node name="DPad" parent="UI" instance=ExtResource("4_djgif")]
-position = Vector2(62, 671)
+[node name="DPadController" parent="UI" instance=ExtResource("4_uu07m")]
+position = Vector2(720, 435)

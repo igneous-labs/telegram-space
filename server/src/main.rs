@@ -9,11 +9,9 @@ use std::{
 };
 
 mod protocol;
-mod types;
 //mod state;
 
-use protocol::{ClientId, Message as ProtocolMessage, MessageType, PlayerStateData};
-use types::{Array, PackedByteArray};
+use protocol::{ClientId, EgressMessage, EgressMessageType, IngressMessage, PlayerStateData};
 
 const PORT: u16 = 1337;
 const WORLD_STATE_BROADCAST_INTERVAL_MS: u64 = 20;
@@ -30,7 +28,6 @@ fn main() {
 
     let event_hub = simple_websockets::launch(PORT).expect("Failed to listen");
 
-
     // TODO: do message passing using state::StateService instead of resource sharing
     let world_state: Arc<Mutex<HashMap<ClientId, PlayerStateData>>> =
         Arc::new(Mutex::new(HashMap::new()));
@@ -46,24 +43,28 @@ fn main() {
             {
                 let clients = clients.lock().unwrap();
                 let world_state = world_state.lock().unwrap();
-                for (client_id, responder) in clients.iter() {
+                for (dest_client_id, responder) in clients.iter() {
                     //info!("sending world state to client_id: {}", client_id);
-                    let world_state_data: Vec<PackedByteArray> = world_state
-                        .iter()
-                        .map(
-                            |(&client_id, &player_state_data)| (&protocol::WorldStateEntry {
-                                client_id,
-                                player_state_data,
-                            }).into(),
-                        )
-                        .collect();
-                    if world_state_data.len() != 0 {
-                        let payload = Message::Binary(
-                            [
-                                u8::from(MessageType::WorldState).to_le_bytes().to_vec(),
-                                Array(world_state_data).into()
-                            ].concat(),
-                        );
+                    let world_state_msg = EgressMessage::WorldState(
+                        world_state
+                            .iter()
+                            .filter_map(|(&client_id, &player_state_data)| {
+                                if *dest_client_id != client_id {
+                                    Some(
+                                        (protocol::WorldStateEntry {
+                                            client_id,
+                                            player_state_data,
+                                        })
+                                        .into(),
+                                    )
+                                } else {
+                                    None
+                                }
+                            })
+                            .collect(),
+                    );
+                    if world_state.len() != 0 {
+                        let payload = Message::Binary((&world_state_msg).into());
                         responder.send(payload);
                     }
                 }
@@ -87,7 +88,9 @@ fn main() {
 
                 let payload = Message::Binary(
                     [
-                        u8::from(MessageType::Acknowledge).to_le_bytes().to_vec(),
+                        u8::from(EgressMessageType::Acknowledge)
+                            .to_le_bytes()
+                            .to_vec(),
                         client_id.to_le_bytes().to_vec(),
                     ]
                     .concat(),
@@ -110,11 +113,11 @@ fn main() {
             Event::Message(client_id, Message::Binary(data)) => {
                 let client_id =
                     ClientId::try_from(client_id).expect("max number of connection exceeded");
-                let msg = ProtocolMessage::try_from(data.as_slice()).unwrap();
+                let msg = IngressMessage::try_from(data.as_slice()).unwrap();
                 //info!("Client #{} messaged: {:?}", client_id, msg);
 
                 // TODO: move this to StateService
-                if let ProtocolMessage::PlayerState(data) = msg {
+                if let IngressMessage::PlayerState(data) = msg {
                     let mut world_state = world_state.lock().unwrap();
                     world_state.insert(client_id, data);
                 }

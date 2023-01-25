@@ -40,10 +40,9 @@ where
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use super::{*, super::PackedByteArray};
+    use super::{super::PackedByteArray, *};
 
     // [
     //  28, 0, 0, 0, // This is an arry

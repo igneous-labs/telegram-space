@@ -1,9 +1,6 @@
-use crate::types::PackedByteArray;
-use super::{
-    ClientId,
-    player_state::PlayerStateData,
-};
+use super::{player_state::PlayerStateData, types::PackedByteArray, ClientId};
 
+#[derive(Debug)]
 pub struct WorldStateEntry {
     pub client_id: ClientId,
     pub player_state_data: PlayerStateData,

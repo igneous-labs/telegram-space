@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://cjepljfvuxfvn"]
+
+[ext_resource type="Texture2D" uid="uid://ci8eple80gs31" path="res://assets/GC_D-Pad.png" id="1_pgsjh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8jt0"]
+
+[node name="DPad" type="Node2D"]
+
+[node name="GcD-pad" type="Sprite2D" parent="."]
+scale = Vector2(0.203333, 0.203333)
+texture = ExtResource("1_pgsjh")
+
+[node name="DPadButtonLeft" type="TouchScreenButton" parent="."]
+shape = SubResource("RectangleShape2D_a8jt0")
+
+[node name="DPadButtonRight" type="TouchScreenButton" parent="."]
+shape = SubResource("RectangleShape2D_a8jt0")
+
+[node name="DPadButtonUp" type="TouchScreenButton" parent="."]
+shape = SubResource("RectangleShape2D_a8jt0")
+
+[node name="DPadButtonDown" type="TouchScreenButton" parent="."]
+shape = SubResource("RectangleShape2D_a8jt0")

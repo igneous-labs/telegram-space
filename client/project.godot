@@ -19,6 +19,11 @@ config/icon="res://icon.svg"
 
 NetworkHandler="*res://src/singletons/network_handler.gd"
 
+[display]
+
+window/size/viewport_width=1080
+window/size/viewport_height=1920
+
 [editor]
 
 export/convert_text_resources_to_binary=true

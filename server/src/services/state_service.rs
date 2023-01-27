@@ -39,6 +39,9 @@ impl StateService {
                 match msg {
                     Message::UpdatePlayerState(client_id, player_state_data) => {
                         world_state.insert(client_id, player_state_data);
+                        // TODO: do not send world state every time it gets mutated.
+                        //       instead, make the StateService non-blocking and
+                        //       sync at WORLD_STATE_SYNC_INTERVAL_MS
                         sender_service_tx
                             .send(sender_service::Message::WorldState(world_state.clone()))
                             .expect("failed to send to SenderService");

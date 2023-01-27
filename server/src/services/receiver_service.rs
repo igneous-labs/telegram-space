@@ -6,9 +6,10 @@ use std::{
 };
 
 use super::{sender_service, state_service};
-use crate::protocol::{ClientId, IngressMessage};
-
-const PORT: u16 = 1337;
+use crate::{
+    protocol::{ClientId, IngressMessage},
+    consts::PORT,
+};
 
 pub struct ReceiverService {
     thread_hdl: JoinHandle<()>,

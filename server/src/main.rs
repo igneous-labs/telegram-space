@@ -4,6 +4,7 @@ use std::sync::mpsc::channel;
 
 mod protocol;
 mod services;
+mod consts;
 
 // NOTE: client_id is downcasted from u64 to u16, and the implementation assumes that
 //       the max connection is kept at u16 max.

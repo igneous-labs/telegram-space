@@ -76,7 +76,7 @@ impl StateService {
             {
                 trace!("Sending world state to SenderService");
                 sender_service_tx
-                    .send(sender_service::Message::WorldState(world_state.clone()))
+                    .send(sender_service::Message::SyncWorldState(world_state.clone()))
                     .expect("failed to send to SenderService");
                 last_synced_at = Some(Instant::now());
             }

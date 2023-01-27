@@ -16,9 +16,9 @@ pub struct SenderService {
 
 #[derive(Debug)]
 pub enum Message {
-    Register(ClientId, Responder),                  // add a new client
-    Deregister(ClientId),                           // remove a disconnected client
-    WorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
+    Register(ClientId, Responder),                      // add a new client
+    Deregister(ClientId),                               // remove a disconnected client
+    SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
 }
 
 impl SenderService {
@@ -38,7 +38,7 @@ impl SenderService {
             for msg in message_rx.iter() {
                 trace!("Received {:?}", msg);
                 match msg {
-                    Message::WorldState(world_state) => {
+                    Message::SyncWorldState(world_state) => {
                         trace!("Broadcasting world state to clients: {:?}", clients.keys());
                         for (dest_client_id, responder) in clients.iter() {
                             let world_state_data: Vec<_> = world_state

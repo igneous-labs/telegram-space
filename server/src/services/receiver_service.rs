@@ -1,4 +1,4 @@
-use log::{info, warn};
+use log::{info, trace, warn};
 use simple_websockets::{Event, EventHub, Message};
 use std::{
     sync::mpsc::Sender,
@@ -7,8 +7,8 @@ use std::{
 
 use super::{sender_service, state_service};
 use crate::{
-    protocol::{ClientId, IngressMessage},
     consts::PORT,
+    protocol::{ClientId, IngressMessage},
 };
 
 pub struct ReceiverService {
@@ -50,7 +50,7 @@ impl ReceiverService {
                         ClientId::try_from(client_id).expect("max number of connection exceeded");
                     info!("Client #{} disconnected.", client_id);
                     sender_service_tx
-                        .send(sender_service::Message::Unregister(client_id))
+                        .send(sender_service::Message::Deregister(client_id))
                         .expect("failed to send to SenderService");
                     state_service_tx
                         .send(state_service::Message::RemovePlayerState(client_id))
@@ -62,6 +62,7 @@ impl ReceiverService {
                     let msg = IngressMessage::try_from(data.as_slice()).unwrap();
                     match msg {
                         IngressMessage::PlayerState(data) => {
+                            trace!("Received player state from client #{}", client_id);
                             state_service_tx
                                 .send(state_service::Message::UpdatePlayerState(client_id, data))
                                 .expect("failed to send to StateService");
@@ -69,7 +70,7 @@ impl ReceiverService {
                     }
                 }
                 unidentified_message => {
-                    warn!("received unidentified message: {:?}", unidentified_message);
+                    warn!("Received unidentified message: {:?}", unidentified_message);
                 }
             }
         })

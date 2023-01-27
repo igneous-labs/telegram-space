@@ -1,3 +1,4 @@
+use log::{debug, trace};
 use simple_websockets::{Message as WebsocketMessage, Responder};
 use std::{
     collections::HashMap,
@@ -16,7 +17,7 @@ pub struct SenderService {
 #[derive(Debug)]
 pub enum Message {
     Register(ClientId, Responder),                  // add a new client
-    Unregister(ClientId),                           // remove a disconnected client
+    Deregister(ClientId),                           // remove a disconnected client
     WorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
 }
 
@@ -35,34 +36,38 @@ impl SenderService {
     ) -> JoinHandle<()> {
         thread::spawn(move || {
             for msg in message_rx.iter() {
+                trace!("Received {:?}", msg);
                 match msg {
                     Message::WorldState(world_state) => {
+                        trace!("Broadcasting world state to clients: {:?}", clients.keys());
                         for (dest_client_id, responder) in clients.iter() {
-                            let world_state_msg = EgressMessage::WorldState(
-                                world_state
-                                    .iter()
-                                    .filter_map(|(&client_id, &player_state_data)| {
-                                        if *dest_client_id != client_id {
-                                            Some(
-                                                (WorldStateEntry {
-                                                    client_id,
-                                                    player_state_data,
-                                                })
-                                                .into(),
-                                            )
-                                        } else {
-                                            None
-                                        }
-                                    })
-                                    .collect(),
-                            );
-                            if world_state.len() != 0 {
-                                let payload = WebsocketMessage::Binary((&world_state_msg).into());
+                            let world_state_data: Vec<_> = world_state
+                                .iter()
+                                .filter_map(|(&client_id, &player_state_data)| {
+                                    if *dest_client_id != client_id {
+                                        Some(
+                                            (WorldStateEntry {
+                                                client_id,
+                                                player_state_data,
+                                            })
+                                            .into(),
+                                        )
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect();
+                            if world_state_data.len() != 0 {
+                                debug!("sending world state to client #{}", dest_client_id);
+                                let payload = WebsocketMessage::Binary(
+                                    (&EgressMessage::WorldState(world_state_data)).into(),
+                                );
                                 responder.send(payload);
                             }
                         }
                     }
                     Message::Register(client_id, responder) => {
+                        debug!("Registering client #{}", client_id);
                         let payload = WebsocketMessage::Binary(
                             [
                                 u8::from(EgressMessageType::Acknowledge)
@@ -75,7 +80,8 @@ impl SenderService {
                         responder.send(payload);
                         clients.insert(client_id, responder);
                     }
-                    Message::Unregister(client_id) => {
+                    Message::Deregister(client_id) => {
+                        debug!("Deregistering client #{}", client_id);
                         clients.remove(&client_id);
                     }
                 }

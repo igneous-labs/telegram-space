@@ -1,8 +1,8 @@
 # Telegram Space
 ## Dependencies
- - godot 4.0 beta 13
-   - https://godotengine.org/article/dev-snapshot-godot-4-0-beta-13/
-   - https://downloads.tuxfamily.org/godotengine/4.0/beta13/
+ - godot 4.0 beta 16
+   - https://godotengine.org/article/dev-snapshot-godot-4-0-beta-16/
+   - https://downloads.tuxfamily.org/godotengine/4.0/beta16
  - rust 1.66.1 (90743e729 2023-01-10)
    - https://rustup.rs/
  - sfz 0.7.1 (for serving build artifacts)

@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
@@ -14,3 +14,8 @@ jobs:
           run: |
             cd client
             ./build-ci.sh
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Archive client/exports
+          path: client/exports

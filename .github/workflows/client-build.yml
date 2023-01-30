@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
+      - uses: docker/setup-buildx-action@v2 # required for caching
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:

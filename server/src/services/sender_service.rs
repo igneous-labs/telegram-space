@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::protocol::{
-    ClientId, EgressMessage, EgressMessageType, PlayerStateData, WorldStateEntry,
+    ClientId, EgressMessage, PlayerStateData, WorldStateEntry,
 };
 
 pub struct SenderService {
@@ -69,13 +69,7 @@ impl SenderService {
                     Message::Register(client_id, responder) => {
                         debug!("Registering client #{}", client_id);
                         let payload = WebsocketMessage::Binary(
-                            [
-                                u8::from(EgressMessageType::Acknowledge)
-                                    .to_le_bytes()
-                                    .to_vec(),
-                                client_id.to_le_bytes().to_vec(),
-                            ]
-                            .concat(),
+                            (&EgressMessage::Acknowledge(client_id)).into()
                         );
                         responder.send(payload);
                         clients.insert(client_id, responder);

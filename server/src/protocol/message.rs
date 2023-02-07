@@ -24,6 +24,7 @@ pub enum IngressMessage {
 pub enum EgressMessageType {
     Acknowledge = 0,
     WorldState = 2,
+    LevelData = 3,
 }
 
 #[derive(Debug)]
@@ -31,6 +32,7 @@ pub enum EgressMessageType {
 pub enum EgressMessage {
     Acknowledge(ClientId),
     WorldState(Vec<WorldStateEntry>),
+    LevelData,
 }
 
 // Deserialization
@@ -82,6 +84,13 @@ impl From<&EgressMessage> for Vec<u8> {
                     .to_le_bytes()
                     .to_vec(),
                 Array(world_state_data.iter().map(PackedByteArray::from).collect()).into(),
+            ]
+            .concat()
+            .to_vec(),
+            EgressMessage::LevelData => [
+                (u8::from(EgressMessageType::LevelData))
+                    .to_le_bytes()
+                    .to_vec(),
             ]
             .concat()
             .to_vec(),

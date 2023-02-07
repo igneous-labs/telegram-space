@@ -1,6 +1,7 @@
 # NetworkHandler singleton (autoloaded)
 extends Node
 
+signal received_level_data(data: Dictionary)
 signal received_world_state(world_state: Dictionary)
 
 var websocket := WebSocketPeer.new()
@@ -52,6 +53,8 @@ func handle_message(payload: PackedByteArray) -> void:
         Protocol.MessageType.WORLD_STATE:
             message.data.erase(client_id)
             emit_signal(&"received_world_state", message.data)
+        Protocol.MessageType.LEVEL_DATA:
+            emit_signal(&"received_level_data", message.data)
         _:
             print("Unhandled message: ", message)
 

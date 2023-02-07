@@ -17,6 +17,13 @@ enum MessageType {
     # payload = [type (1), position (12), direction (1), status (1)]
     PLAYER_STATE = 1,
     WORLD_STATE = 2,
+    
+    # server -> client
+    # data = {
+    #   level: PackedScene
+    # }
+    # payload = [type (1), data ()]
+    LEVEL_DATA = 3,
 }
 
 static func serialize_message(type: MessageType, data: Dictionary) -> PackedByteArray:
@@ -35,7 +42,7 @@ static func serialize_message(type: MessageType, data: Dictionary) -> PackedByte
     return payload
 
 static func deserialize_message(payload: PackedByteArray) -> Dictionary:
-    var type = payload.decode_u8(0);
+    var type := payload.decode_u8(0);
     match type:
         MessageType.ACKNOWLEDGE:
             return {
@@ -56,6 +63,13 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
             return {
                 "type": MessageType.WORLD_STATE,
                 "data": data,
+            }
+        MessageType.LEVEL_DATA:
+            print("received level data")
+            print("not yet implemented")
+            return {
+                "type": MessageType.LEVEL_DATA,
+                "data": {}
             }
         _:
             # These messages are not expected to come into client

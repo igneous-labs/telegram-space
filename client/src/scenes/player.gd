@@ -25,7 +25,7 @@ func update_player_state(input_vector: Vector2):
         self.character_status = Common.CharacterStatus.IDLE
 
 func publish_player_state() -> void:
-    NetworkHandler.publish_player_state({
+    NetworkHandler.send_message(Protocol.MessageType.PLAYER_STATE, {
         "position": self.position,
         "direction": self.character_direction,
         "status": self.character_status,

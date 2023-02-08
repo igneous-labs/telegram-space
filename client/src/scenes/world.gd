@@ -4,11 +4,9 @@ const PlayerScene := preload("res://src/scenes/player.tscn")
 const RemotePlayerScene := preload("res://src/scenes/remote_player.tscn")
 
 var last_world_state: Dictionary = {}
-var initialized := false
 
-func setup() -> void:
-    NetworkHandler.received_world_state.connect(handle_received_world_state)
-    self.initialized = true
+func _ready() -> void:
+    NetworkHandler.received_world_state.connect(self.handle_received_world_state)
 
 func load_level(level: PackedScene) -> void:
     self.add_child(level.instantiate())

@@ -1,4 +1,4 @@
-use log::{debug, trace};
+use log::{debug, info, trace, warn};
 use simple_websockets::{Message as WebsocketMessage, Responder};
 use std::{
     collections::HashMap,
@@ -7,7 +7,7 @@ use std::{
 };
 
 use crate::protocol::{
-    ClientId, EgressMessage, PlayerStateData, WorldStateEntry,
+    ClientId, CompressedLevelData, EgressMessage, LevelId, PlayerStateData, WorldStateEntry,
 };
 
 pub struct SenderService {
@@ -19,6 +19,7 @@ pub enum Message {
     Register(ClientId, Responder),                      // add a new client
     Deregister(ClientId),                               // remove a disconnected client
     SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
+    SendLevel(ClientId, LevelId, CompressedLevelData),
 }
 
 impl SenderService {
@@ -68,15 +69,27 @@ impl SenderService {
                     }
                     Message::Register(client_id, responder) => {
                         debug!("Registering client #{}", client_id);
-                        let payload = WebsocketMessage::Binary(
-                            (&EgressMessage::Acknowledge(client_id)).into()
-                        );
-                        responder.send(payload);
+                        responder.send(WebsocketMessage::Binary(
+                            (&EgressMessage::Acknowledge(client_id)).into(),
+                        ));
                         clients.insert(client_id, responder);
                     }
                     Message::Deregister(client_id) => {
                         debug!("Deregistering client #{}", client_id);
                         clients.remove(&client_id);
+                    }
+                    Message::SendLevel(client_id, level_id, compressed_level_data) => {
+                        info!(
+                            "Sending level data for level #{} to client #{}",
+                            level_id, client_id
+                        );
+                        if let Some(responder) = clients.get(&client_id) {
+                            responder.send(WebsocketMessage::Binary(
+                                (&EgressMessage::LevelData(level_id, compressed_level_data)).into(),
+                            ));
+                        } else {
+                            warn!("Could not find client #{}, ignoring request", client_id);
+                        }
                     }
                 }
             }

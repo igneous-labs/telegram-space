@@ -1,7 +1,6 @@
 # NetworkHandler singleton (autoloaded)
 extends Node
 
-signal received_level_data(data: Dictionary)
 signal received_world_state(world_state: Dictionary)
 
 var websocket := WebSocketPeer.new()
@@ -28,6 +27,8 @@ func _physics_process(_delta: float) -> void:
     match websocket.get_ready_state():
         WebSocketPeer.STATE_OPEN:
             while websocket.get_available_packet_count():
+                # TODO: consider making this concurrent
+                #self.emit_signal(&"received_message", websocket.get_packet())
                 self.handle_message(websocket.get_packet())
         WebSocketPeer.STATE_CLOSING:
             # Keep polling to achieve proper close.
@@ -54,14 +55,15 @@ func handle_message(payload: PackedByteArray) -> void:
             message.data.erase(client_id)
             emit_signal(&"received_world_state", message.data)
         Protocol.MessageType.LEVEL_DATA:
-            emit_signal(&"received_level_data", message.data)
+            # TODO: should this be a signal instead?
+            LevelDataManager.insert_level(message.data.level_id, message.data.level_data)
         _:
             print("Unhandled message: ", message)
 
-func publish_player_state(state: Dictionary) -> void:
+func send_message(message_type: Protocol.MessageType, message_data: Dictionary) -> void:
     if not self.initialized:
         return
     websocket.send(
-        Protocol.serialize_message(Protocol.MessageType.PLAYER_STATE, state),
+        Protocol.serialize_message(message_type, message_data),
         WebSocketPeer.WRITE_MODE_BINARY,
     )

@@ -2,7 +2,7 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use super::{
     errors::ProtocolErrors,
-    level::{CompressedLevelData, LevelId},
+    level::LevelId,
     player_state::PlayerStateData,
     types::{Array, PackedByteArray},
     world_state::WorldStateEntry,
@@ -36,7 +36,7 @@ pub enum EgressMessageType {
 pub enum EgressMessage {
     Acknowledge(ClientId),
     WorldState(Vec<WorldStateEntry>),
-    LevelData(LevelId, CompressedLevelData),
+    LevelData(LevelId, Vec<u8>),
 }
 
 // Deserialization
@@ -104,7 +104,7 @@ impl From<&EgressMessage> for Vec<u8> {
                     .to_le_bytes()
                     .to_vec(),
                 level_id.to_le_bytes().to_vec(),
-                compressed_level_data.into(),
+                compressed_level_data.to_vec(),
             ]
             .concat()
             .to_vec(),

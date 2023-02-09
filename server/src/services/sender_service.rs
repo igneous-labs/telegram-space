@@ -1,4 +1,4 @@
-use log::{debug, info, trace, warn};
+use log::{debug, trace, warn};
 use simple_websockets::{Message as WebsocketMessage, Responder};
 use std::{
     collections::HashMap,
@@ -6,9 +6,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use crate::protocol::{
-    ClientId, CompressedLevelData, EgressMessage, LevelId, PlayerStateData, WorldStateEntry,
-};
+use crate::protocol::{ClientId, EgressMessage, LevelId, PlayerStateData, WorldStateEntry};
 
 pub struct SenderService {
     thread_hdl: JoinHandle<()>,
@@ -19,7 +17,7 @@ pub enum Message {
     Register(ClientId, Responder),                      // add a new client
     Deregister(ClientId),                               // remove a disconnected client
     SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
-    SendLevel(ClientId, LevelId, CompressedLevelData),
+    SendLevel(ClientId, LevelId, Vec<u8>),
 }
 
 impl SenderService {
@@ -78,14 +76,14 @@ impl SenderService {
                         debug!("Deregistering client #{}", client_id);
                         clients.remove(&client_id);
                     }
-                    Message::SendLevel(client_id, level_id, compressed_level_data) => {
-                        info!(
+                    Message::SendLevel(client_id, level_id, level_data) => {
+                        debug!(
                             "Sending level data for level #{} to client #{}",
                             level_id, client_id
                         );
                         if let Some(responder) = clients.get(&client_id) {
                             responder.send(WebsocketMessage::Binary(
-                                (&EgressMessage::LevelData(level_id, compressed_level_data)).into(),
+                                (&EgressMessage::LevelData(level_id, level_data)).into(),
                             ));
                         } else {
                             warn!("Could not find client #{}, ignoring request", client_id);

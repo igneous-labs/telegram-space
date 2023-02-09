@@ -1,4 +1,4 @@
-use log::{debug, trace, warn};
+use log::{debug, info, trace, warn};
 use std::{
     collections::HashMap,
     sync::mpsc::{Receiver, Sender},
@@ -8,7 +8,7 @@ use std::{
 use super::sender_service;
 use crate::{
     consts::LEVEL_DATA_DIR,
-    protocol::{ClientId, CompressedLevelData, LevelId},
+    protocol::{ClientId, LevelId},
 };
 
 pub struct LevelService {
@@ -17,7 +17,7 @@ pub struct LevelService {
 
 #[derive(Debug)]
 pub enum Message {
-    UpdateLevel(LevelId, CompressedLevelData),
+    UpdateLevel(LevelId, Vec<u8>),
     SendLevel(ClientId, LevelId),
 }
 
@@ -26,7 +26,7 @@ impl LevelService {
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let levels: HashMap<LevelId, CompressedLevelData> = Self::load_levels();
+        let levels: HashMap<LevelId, Vec<u8>> = Self::load_levels();
 
         Self {
             thread_hdl: Self::spawn_service(levels, message_rx, sender_service_tx),
@@ -34,47 +34,42 @@ impl LevelService {
     }
 
     // TODO: This function should load compressed level from data storage (TBD).
-    //       For now it just reads test_level from file as level_id = 0.
-    fn load_levels() -> HashMap<LevelId, CompressedLevelData> {
-        let mut levels = HashMap::new();
+    //       For now it just reads all files from LEVEL_DATA_DIR
+    fn load_levels() -> HashMap<LevelId, Vec<u8>> {
+        let mut levels: HashMap<LevelId, Vec<u8>> = HashMap::new();
 
-        {
-            use std::io::Read;
-            let data_file = std::path::Path::new(LEVEL_DATA_DIR).join("0.dat");
-            let mut f = std::fs::File::open(&data_file).expect("no file found");
-            let metadata = std::fs::metadata(&data_file).expect("unable to read metadata");
-            let mut buffer = vec![0; metadata.len() as usize];
-            f.read(&mut buffer).expect("buffer overflow");
-            // make three test levels (identical levels for now)
-            levels.insert(
-                0,
-                CompressedLevelData {
-                    decompressed_size: 230996,
-                    data: buffer.clone(),
-                },
-            );
-            levels.insert(
-                1,
-                CompressedLevelData {
-                    decompressed_size: 230996,
-                    data: buffer.clone(),
-                },
-            );
-            levels.insert(
-                2,
-                CompressedLevelData {
-                    decompressed_size: 230996,
-                    data: buffer,
-                },
-            );
-            debug!("Loaded {} level(s)", levels.len());
+        use std::io::Read;
+        for dir_entry in std::fs::read_dir(LEVEL_DATA_DIR).unwrap() {
+            if let Ok(dir_entry) = dir_entry {
+                let mut f = std::fs::File::open(&dir_entry.path()).expect("no file found");
+                let mut buffer = vec![
+                    0;
+                    dir_entry
+                        .metadata()
+                        .expect(&format!("could not read metadata of {:?}", dir_entry))
+                        .len() as usize
+                ];
+                f.read(&mut buffer).expect("buffer overflow");
+                let level_id: u64 = dir_entry
+                    .path()
+                    .file_stem()
+                    .expect(&format!("could not parse file stem of {:?}", dir_entry))
+                    .to_str()
+                    .expect(&format!("could not parse str from file stem of {:?}", dir_entry))
+                    .parse()
+                    .expect(&format!("could not parse u64 from file stem of {:?}", dir_entry));
+                levels.insert(level_id, buffer.clone());
+
+                debug!("Loaded level {}", level_id);
+            }
         }
+        info!("Loaded {} level(s)", levels.len());
 
         levels
     }
 
     fn spawn_service(
-        mut levels: HashMap<LevelId, CompressedLevelData>,
+        mut levels: HashMap<LevelId, Vec<u8>>,
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> JoinHandle<()> {
@@ -82,19 +77,18 @@ impl LevelService {
             for msg in message_rx.iter() {
                 trace!("Received {:?}", msg);
                 match msg {
-                    Message::UpdateLevel(level_id, compressed_level_data) => {
-                        levels.insert(level_id, compressed_level_data);
+                    Message::UpdateLevel(level_id, level_data) => {
                         // TODO: save level data to the data storage
                         // TODO: sync with clients?
                     }
                     Message::SendLevel(client_id, level_id) => {
                         trace!("Sending level #{} to SenderService", level_id);
-                        if let Some(compressed_level_data) = levels.get(&level_id) {
+                        if let Some(level_data) = levels.get(&level_id) {
                             sender_service_tx
                                 .send(sender_service::Message::SendLevel(
                                     client_id,
                                     level_id,
-                                    compressed_level_data.clone(),
+                                    level_data.clone(),
                                 ))
                                 .expect("failed to send to SenderService");
                         } else {

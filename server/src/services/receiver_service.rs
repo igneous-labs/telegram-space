@@ -5,7 +5,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use super::{sender_service, state_service};
+use super::{level_service, sender_service, state_service};
 use crate::{
     consts::PORT,
     protocol::{ClientId, IngressMessage},
@@ -18,17 +18,24 @@ pub struct ReceiverService {
 impl ReceiverService {
     pub fn new(
         state_service_tx: Sender<state_service::Message>,
+        level_service_tx: Sender<level_service::Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
         let event_hub = simple_websockets::launch(PORT).expect("Failed to listen");
 
         Self {
-            thread_hdl: Self::spawn_service(state_service_tx, sender_service_tx, event_hub),
+            thread_hdl: Self::spawn_service(
+                state_service_tx,
+                level_service_tx,
+                sender_service_tx,
+                event_hub,
+            ),
         }
     }
 
     fn spawn_service(
         state_service_tx: Sender<state_service::Message>,
+        level_service_tx: Sender<level_service::Message>,
         sender_service_tx: Sender<sender_service::Message>,
         event_hub: EventHub,
     ) -> JoinHandle<()> {
@@ -65,6 +72,25 @@ impl ReceiverService {
                             trace!("Received player state from client #{}", client_id);
                             state_service_tx
                                 .send(state_service::Message::UpdatePlayerState(client_id, data))
+                                .expect("failed to send to StateService");
+                        }
+                        IngressMessage::RequestLevel(level_id) => {
+                            trace!("Client #{} requested level #{}", client_id, level_id);
+                            level_service_tx
+                                .send(level_service::Message::SendLevel(client_id, level_id))
+                                .expect("failed to send to LevelService");
+                        }
+                        IngressMessage::PlayerInstance(instance_id) => {
+                            trace!(
+                                "Client #{} requested to register to instance #{}",
+                                client_id,
+                                instance_id
+                            );
+                            state_service_tx
+                                .send(state_service::Message::UpdatePlayerInstance(
+                                    client_id,
+                                    instance_id,
+                                ))
                                 .expect("failed to send to StateService");
                         }
                     }

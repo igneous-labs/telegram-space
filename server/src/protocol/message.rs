@@ -1,22 +1,27 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use super::{
-    errors::ProtocolErrors, player_state::PlayerStateData, world_state::WorldStateEntry, ClientId,
+    errors::ProtocolErrors,
+    player_state::PlayerStateData,
+    types::{Array, PackedByteArray},
+    world_state::WorldStateEntry,
+    ClientId, InstanceId, LevelId,
 };
-
-// TODO: consider moving types module into protocol
-use super::types::{Array, PackedByteArray};
 
 #[derive(IntoPrimitive, TryFromPrimitive, Eq, PartialEq)]
 #[repr(u8)]
 pub enum IngressMessageType {
     PlayerState = 1,
+    RequestLevel = 3,
+    PlayerInstance = 5,
 }
 
 #[derive(Debug)]
 #[repr(u8)]
 pub enum IngressMessage {
     PlayerState(PlayerStateData),
+    RequestLevel(LevelId),
+    PlayerInstance(InstanceId),
 }
 
 #[derive(IntoPrimitive, TryFromPrimitive, Eq, PartialEq)]
@@ -24,6 +29,8 @@ pub enum IngressMessage {
 pub enum EgressMessageType {
     Acknowledge = 0,
     WorldState = 2,
+    LevelData = 4,
+    PlayerInstanceAcknowledge = 6,
 }
 
 #[derive(Debug)]
@@ -31,6 +38,8 @@ pub enum EgressMessageType {
 pub enum EgressMessage {
     Acknowledge(ClientId),
     WorldState(Vec<WorldStateEntry>),
+    LevelData(LevelId, Vec<u8>),
+    PlayerInstanceAcknowledge(InstanceId),
 }
 
 // Deserialization
@@ -60,6 +69,22 @@ impl TryFrom<&[u8]> for IngressMessage {
                     status: data[14],
                 })
             }
+            IngressMessageType::RequestLevel => {
+                if data.len() != 9 {
+                    return Err(ProtocolErrors::DeserializationError(
+                        "given bytes is in wrong length".into(),
+                    ));
+                }
+                Self::RequestLevel(u64::from_le_bytes(data[1..=8].try_into().unwrap()))
+            }
+            IngressMessageType::PlayerInstance => {
+                if data.len() != 9 {
+                    return Err(ProtocolErrors::DeserializationError(
+                        "given bytes is in wrong length".into(),
+                    ));
+                }
+                Self::PlayerInstance(u64::from_le_bytes(data[1..=8].try_into().unwrap()))
+            }
         };
         Ok(msg)
     }
@@ -82,6 +107,23 @@ impl From<&EgressMessage> for Vec<u8> {
                     .to_le_bytes()
                     .to_vec(),
                 Array(world_state_data.iter().map(PackedByteArray::from).collect()).into(),
+            ]
+            .concat()
+            .to_vec(),
+            EgressMessage::LevelData(level_id, compressed_level_data) => [
+                (u8::from(EgressMessageType::LevelData))
+                    .to_le_bytes()
+                    .to_vec(),
+                level_id.to_le_bytes().to_vec(),
+                compressed_level_data.to_vec(),
+            ]
+            .concat()
+            .to_vec(),
+            EgressMessage::PlayerInstanceAcknowledge(instance_id) => [
+                (u8::from(EgressMessageType::PlayerInstanceAcknowledge))
+                    .to_le_bytes()
+                    .to_vec(),
+                instance_id.to_le_bytes().to_vec(),
             ]
             .concat()
             .to_vec(),

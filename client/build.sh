@@ -3,7 +3,7 @@
 readonly BASE_DIR=$(dirname $(readlink -f "$0"))
 readonly BUILD_DIR="${BASE_DIR}/exports"
 
-# NB: change this to where godot_v4.0-beta16 binary is installed
+# NB: change this to where godot_v4.0-rc1 binary is installed
 readonly GODOT="/path/to/godot/binary"
 readonly TARGET="Web"
 

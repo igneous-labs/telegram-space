@@ -11,16 +11,18 @@ config_version=5
 [application]
 
 config/name="telegram-space-client"
-run/main_scene="res://src/scenes/main.tscn"
+run/main_scene="res://src/scenes/loader.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 NetworkHandler="*res://src/singletons/network_handler.gd"
+LevelDataManager="*res://src/singletons/level_data_manager.gd"
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
 textures/canvas_textures/default_texture_filter=0

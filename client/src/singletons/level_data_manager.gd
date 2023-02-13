@@ -25,6 +25,7 @@ func insert_level(level_id: int, level_data: PackedByteArray) -> void:
     if not self._data.has(level_id) or level_data_hash != self._data[level_id].hash:
         var level_scene = PackedScene.new()
         level_scene._bundled = bytes_to_var_with_objects(level_data)
+        print(level_scene._bundled)
         self._data[level_id] = {
             "hash": level_data_hash,
             "level_scene": level_scene,

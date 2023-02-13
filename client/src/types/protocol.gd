@@ -113,7 +113,6 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
                 "data": data,
             }
         MessageType.LEVEL_DATA:
-            print(payload)
             var decompressed_size = payload.decode_u32(9)
             return {
                 "type": MessageType.LEVEL_DATA,
@@ -123,8 +122,8 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
                 }
             }
         MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:
-            print(payload)
             var decompressed_size = payload.decode_u32(9)
+            decompressed_size = payload.decode_u32(9)
             return {
                 "type": MessageType.PLAYER_INSTANCE_ACKNOWLEDGE,
                 "data": {

@@ -114,6 +114,8 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
             }
         MessageType.LEVEL_DATA:
             var decompressed_size = payload.decode_u32(9)
+            print("decompressed_size: ", decompressed_size)
+            print("decompressed thing: ", payload.slice(13).decompress(decompressed_size, FileAccess.CompressionMode.COMPRESSION_ZSTD))
             return {
                 "type": MessageType.LEVEL_DATA,
                 "data": {

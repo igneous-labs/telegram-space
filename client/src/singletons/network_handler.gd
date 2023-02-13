@@ -2,6 +2,7 @@
 extends Node
 
 signal received_world_state(world_state: Dictionary)
+signal received_player_instance_acknowledge(level_id: int)
 
 var websocket := WebSocketPeer.new()
 const WEBSOCKET_URL := "ws://localhost:1337"
@@ -27,6 +28,8 @@ func _physics_process(_delta: float) -> void:
     match websocket.get_ready_state():
         WebSocketPeer.STATE_OPEN:
             while websocket.get_available_packet_count():
+                # TODO: consider making this concurrent
+                #self.emit_signal(&"received_message", websocket.get_packet())
                 self.handle_message(websocket.get_packet())
         WebSocketPeer.STATE_CLOSING:
             # Keep polling to achieve proper close.
@@ -43,22 +46,31 @@ func _physics_process(_delta: float) -> void:
             set_physics_process(false) # Stop processing.
 
 func handle_message(payload: PackedByteArray) -> void:
-    #print("Message payload: ", payload)
     var message = Protocol.deserialize_message(payload)
     match message.type:
         Protocol.MessageType.ACKNOWLEDGE:
+            # TODO: change this to how PLAYER_INSTANCE awaits for its acknowledge message
             self.client_id = message.data.client_id
             self.initialized = true
         Protocol.MessageType.WORLD_STATE:
-            message.data.erase(client_id)
+            message.data.erase(self.client_id)
             emit_signal(&"received_world_state", message.data)
+        Protocol.MessageType.LEVEL_DATA:
+            # TODO: change this to how PLAYER_INSTANCE awaits for its acknowledge message
+            LevelDataManager.insert_level(message.data.level_id, message.data.level_data)
+        Protocol.MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:
+            emit_signal(&"received_player_instance_acknowledge", message.data.level_id)
         _:
             print("Unhandled message: ", message)
 
-func publish_player_state(state: Dictionary) -> void:
+func send_message(message_type: Protocol.MessageType, message_data: Dictionary) -> void:
     if not self.initialized:
         return
     websocket.send(
-        Protocol.serialize_message(Protocol.MessageType.PLAYER_STATE, state),
+        Protocol.serialize_message(message_type, message_data),
         WebSocketPeer.WRITE_MODE_BINARY,
     )
+
+# TODO: consider adding
+#  - send_message_and_await
+#  - send_message_and_callback

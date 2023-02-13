@@ -10,3 +10,5 @@ pub use types::*;
 pub use world_state::*;
 
 pub type ClientId = u16;
+pub type LevelId = u64;
+pub type InstanceId = u64;

@@ -1,0 +1,124 @@
+[gd_scene load_steps=10 format=3 uid="uid://b502f1f4jer2m"]
+
+[ext_resource type="Script" path="res://src/scenes/loader.gd" id="1_pgj70"]
+[ext_resource type="Texture2D" uid="uid://bce71fan5h7bp" path="res://assets/characters/Alex_16x16.png" id="2_muxcu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ib3hk"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(288, 32, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d6vcu"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(304, 32, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sekyy"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(320, 32, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cjj7h"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(336, 32, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s873s"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(352, 32, 16, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ntosu"]
+atlas = ExtResource("2_muxcu")
+region = Rect2(368, 32, 16, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_u2x6l"]
+resource_local_to_scene = true
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ib3hk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d6vcu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sekyy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cjj7h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s873s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ntosu")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Loader" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pgj70")
+
+[node name="C" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="C"]
+position = Vector2(20, 0)
+scale = Vector2(5, 5)
+sprite_frames = SubResource("SpriteFrames_u2x6l")
+frame_progress = 0.572886
+
+[node name="Label" type="Label" parent="C"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -45.5
+offset_top = 100.0
+offset_right = 45.5
+offset_bottom = 126.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 45
+text = "LOADING ..."
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="LoadingStateLabel" type="Label" parent="C"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -126.0
+offset_top = 152.0
+offset_right = 126.0
+offset_bottom = 218.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="CheckLoadingInterval" type="Timer" parent="."]
+wait_time = 0.5

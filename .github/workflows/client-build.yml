@@ -29,6 +29,6 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: |
           mkdir -p .vercel/output
-          echo '{ "version": 3,   "routes": [ { "src": "/", "headers": { "Cross-Origin-Resource-Policy": "cross-origin", "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Embedder-Policy": "require-corp" } } ] }' > .vercel/output/config.json
+          echo '{ "version": 3,   "routes": [ { "src": "/(.)*", "headers": { "Cross-Origin-Resource-Policy": "cross-origin", "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Embedder-Policy": "require-corp" } } ] }' > .vercel/output/config.json
           cp -rv client/exports .vercel/output/static
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

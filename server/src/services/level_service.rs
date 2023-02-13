@@ -55,9 +55,15 @@ impl LevelService {
                     .file_stem()
                     .expect(&format!("could not parse file stem of {:?}", dir_entry))
                     .to_str()
-                    .expect(&format!("could not parse str from file stem of {:?}", dir_entry))
+                    .expect(&format!(
+                        "could not parse str from file stem of {:?}",
+                        dir_entry
+                    ))
                     .parse()
-                    .expect(&format!("could not parse u64 from file stem of {:?}", dir_entry));
+                    .expect(&format!(
+                        "could not parse u64 from file stem of {:?}",
+                        dir_entry
+                    ));
                 levels.insert(level_id, buffer.clone());
 
                 debug!("Loaded level {}", level_id);

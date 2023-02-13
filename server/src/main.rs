@@ -11,7 +11,7 @@ mod services;
 fn main() {
     SimpleLogger::new()
         .with_level(LevelFilter::Off)
-        .with_module_level("telegram_space_server", LevelFilter::Info)
+        .with_module_level("telegram_space_server", LevelFilter::Debug)
         .with_utc_timestamps()
         .init()
         .unwrap();
@@ -23,7 +23,16 @@ fn main() {
     let level_service = services::LevelService::new(level_service_rx, sender_service_tx.clone());
     let sender_service = services::SenderService::new(sender_service_rx);
     let receiver_service =
-        services::ReceiverService::new(state_service_tx, level_service_tx, sender_service_tx);
+        // TODO: remove clone from state_service_tx
+        services::ReceiverService::new(state_service_tx.clone(), level_service_tx, sender_service_tx);
+    // DELETEME: temporarily setup testing instances
+    state_service_tx
+        .send(services::state_service::Message::CreateInstance(0, 0))
+        .expect("failed to send to StateService");
+    state_service_tx
+        .send(services::state_service::Message::CreateInstance(1, 1))
+        .expect("failed to send to StateService");
+
     info!("Server initialized");
 
     state_service.join().unwrap();

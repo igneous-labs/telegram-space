@@ -122,4 +122,3 @@ uppercase = true
 
 [node name="CheckLoadingInterval" type="Timer" parent="."]
 wait_time = 0.5
-autostart = true

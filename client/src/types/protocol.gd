@@ -50,6 +50,21 @@ enum MessageType {
     # }
     # payload = [type (1), level_id(8), decompressed_size (4), compressed_level_data(decompressed_size)]
     LEVEL_DATA = 4,
+    # Client registers player to an instance
+    # NOTE: This includes both initial registeration and updating current instance
+    # client -> server
+    # data = {
+    #   instance_id: u64,
+    # }
+    # payload = [type(1), instance_id(8)]
+    PLAYER_INSTANCE = 5,
+    # Server acknowledges for player instance registration
+    # server -> client
+    # data = {
+    #   level_id: u64,
+    # }
+    # payload = [type(1), level_id(8)]
+    PLAYER_INSTANCE_ACKNOWLEDGE = 6,
 }
 
 static func serialize_message(type: MessageType, data: Dictionary) -> PackedByteArray:
@@ -65,6 +80,10 @@ static func serialize_message(type: MessageType, data: Dictionary) -> PackedByte
             payload.resize(9)
             payload.encode_u8(0, MessageType.REQUEST_LEVEL) # 1 byte;   (1)
             payload.encode_u64(1, data.level_id)            # 8 byte;   (9)
+        MessageType.PLAYER_INSTANCE:
+            payload.resize(9)
+            payload.encode_u8(0, MessageType.PLAYER_INSTANCE)  # 1 byte;   (1)
+            payload.encode_u64(1, data.instance_id)            # 8 byte;   (9)
         _:
             # These messages are not expected to be sent to server
             push_error("unexpected message type was serialized")
@@ -100,6 +119,14 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
                 "data": {
                     "level_id": payload.decode_u64(1),
                     "level_data": payload.slice(13).decompress(decompressed_size, FileAccess.CompressionMode.COMPRESSION_ZSTD),
+                }
+            }
+        MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:
+            var decompressed_size = payload.decode_u32(9)
+            return {
+                "type": MessageType.PLAYER_INSTANCE_ACKNOWLEDGE,
+                "data": {
+                    "level_id": payload.decode_u64(1),
                 }
             }
         _:

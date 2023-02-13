@@ -80,6 +80,19 @@ impl ReceiverService {
                                 .send(level_service::Message::SendLevel(client_id, level_id))
                                 .expect("failed to send to LevelService");
                         }
+                        IngressMessage::PlayerInstance(instance_id) => {
+                            trace!(
+                                "Client #{} requested to register to instance #{}",
+                                client_id,
+                                instance_id
+                            );
+                            state_service_tx
+                                .send(state_service::Message::UpdatePlayerInstance(
+                                    client_id,
+                                    instance_id,
+                                ))
+                                .expect("failed to send to StateService");
+                        }
                     }
                 }
                 unidentified_message => {

@@ -1,15 +1,8 @@
 extends Node
 
-const LEVEL_ID := 0
+const DEFAULT_INSTANCE_ID := 0
 
 func _ready() -> void:
-    $World.modulate = Color.BLACK
-    $World.load_level(LevelDataManager.get_level(LEVEL_ID))
-    $World.spawn_player({
-        "position": Vector2(100, 100),
-        "direction": Common.Direction.LEFT,
-        "status": Common.CharacterStatus.IDLE,
-    })
-    create_tween()\
-        .tween_property($World, "modulate", Color.WHITE, 1)\
-        .set_trans(Tween.TRANS_EXPO)
+    $UI/InstanceSelector.selected = DEFAULT_INSTANCE_ID
+    $UI/InstanceSelector.item_selected.connect($World.initialize)
+    $World.initialize(DEFAULT_INSTANCE_ID)

@@ -18,6 +18,7 @@ pub enum Message {
     Deregister(ClientId),                               // remove a disconnected client
     SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
     SendLevel(ClientId, LevelId, Vec<u8>),
+    PlayerInstanceAcknowledge(ClientId, LevelId),
 }
 
 impl SenderService {
@@ -38,8 +39,11 @@ impl SenderService {
                 trace!("Received {:?}", msg);
                 match msg {
                     Message::SyncWorldState(world_state) => {
-                        trace!("Broadcasting world state to clients: {:?}", clients.keys());
-                        for (dest_client_id, responder) in clients.iter() {
+                        trace!(
+                            "Broadcasting world state to clients: {:?}",
+                            world_state.keys()
+                        );
+                        for dest_client_id in world_state.keys() {
                             let world_state_data: Vec<_> = world_state
                                 .iter()
                                 .filter_map(|(&client_id, &player_state_data)| {
@@ -56,13 +60,12 @@ impl SenderService {
                                     }
                                 })
                                 .collect();
-                            if world_state_data.len() != 0 {
-                                debug!("sending world state to client #{}", dest_client_id);
-                                let payload = WebsocketMessage::Binary(
-                                    (&EgressMessage::WorldState(world_state_data)).into(),
-                                );
-                                responder.send(payload);
-                            }
+                            debug!("sending world state to client #{}", dest_client_id);
+                            let payload = WebsocketMessage::Binary(
+                                (&EgressMessage::WorldState(world_state_data)).into(),
+                            );
+                            let responder = clients.get(dest_client_id).unwrap();
+                            responder.send(payload);
                         }
                     }
                     Message::Register(client_id, responder) => {
@@ -84,6 +87,16 @@ impl SenderService {
                         if let Some(responder) = clients.get(&client_id) {
                             responder.send(WebsocketMessage::Binary(
                                 (&EgressMessage::LevelData(level_id, level_data)).into(),
+                            ));
+                        } else {
+                            warn!("Could not find client #{}, ignoring request", client_id);
+                        }
+                    }
+                    Message::PlayerInstanceAcknowledge(client_id, level_id) => {
+                        debug!("Sending level id #{} to client #{}", level_id, client_id);
+                        if let Some(responder) = clients.get(&client_id) {
+                            responder.send(WebsocketMessage::Binary(
+                                (&EgressMessage::PlayerInstanceAcknowledge(level_id)).into(),
                             ));
                         } else {
                             warn!("Could not find client #{}, ignoring request", client_id);

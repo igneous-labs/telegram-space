@@ -45,10 +45,9 @@ enum MessageType {
     # server -> client
     # data = {
     #   level_id: u64,
-    #   decompressed_size: u32,
-    #   compressed_level_data: PackedByteArray,
+    #   level_data: PackedByteArray,
     # }
-    # payload = [type (1), level_id(8), decompressed_size (4), compressed_level_data(decompressed_size)]
+    # payload = [type (1), level_id(8), level_data(variable_size)]
     LEVEL_DATA = 4,
     # Client registers player to an instance
     # NOTE: This includes both initial registeration and updating current instance
@@ -114,13 +113,11 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
             }
         MessageType.LEVEL_DATA:
             var decompressed_size = payload.decode_u32(9)
-            print("decompressed_size: ", decompressed_size)
-            print("decompressed thing: ", payload.slice(13).decompress(decompressed_size, FileAccess.CompressionMode.COMPRESSION_ZSTD))
             return {
                 "type": MessageType.LEVEL_DATA,
                 "data": {
                     "level_id": payload.decode_u64(1),
-                    "level_data": payload.slice(13).decompress(decompressed_size, FileAccess.CompressionMode.COMPRESSION_ZSTD),
+                    "level_data": payload.slice(9),
                 }
             }
         MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:

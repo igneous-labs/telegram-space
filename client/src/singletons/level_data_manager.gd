@@ -21,15 +21,26 @@ const REQUEST_DELAY_SEC := 5.0
 var _data: Dictionary = {}
 
 func insert_level(level_id: int, level_data: PackedByteArray) -> void:
+    print("inserting: ", level_id)
+    print("data: ", level_data)
     var level_data_hash = Hash.hash_packed_byte_array(level_data).decode_s32(0)
     if not self._data.has(level_id) or level_data_hash != self._data[level_id].hash:
-        var level_scene = PackedScene.new()
-        print(bytes_to_var_with_objects(level_data))
-        level_scene._bundled = bytes_to_var_with_objects(level_data)
-        self._data[level_id] = {
-            "hash": level_data_hash,
-            "level_scene": level_scene,
-        }
+        var level_scene = self.save_to_file_and_load(level_id, level_data)
+        if level_scene != null:
+            self._data[level_id] = {
+                "hash": level_data_hash,
+                "level_scene": level_scene,
+            }
+
+func save_to_file_and_load(level_id: int, level_data: PackedByteArray) -> PackedScene:
+    var file_name = "res://%s.res" % level_id
+    var f = FileAccess.open(file_name, FileAccess.WRITE)
+    f.store_buffer(level_data)
+    f.flush()
+    f = null
+    var res = ResourceLoader.load(file_name)
+    print(res)
+    return res
 
 func get_level(level_id: int) -> PackedScene:
     return self._data[level_id].level_scene if self.has(level_id) else null

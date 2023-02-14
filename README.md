@@ -11,6 +11,9 @@
    - You can also do brew install on macOS: https://github.com/weihanglo/sfz#macos
    - or just download prebuilt binary from gh: https://github.com/weihanglo/sfz#prebuilt-binaries
 
+## CI
+ - f8122dac91/godot-4.0-ci-exporter: https://hub.docker.com/r/f8122dac91/godot-4.0-ci-exporter
+
 ---
 
 ## How to Build

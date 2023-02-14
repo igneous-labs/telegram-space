@@ -49,14 +49,8 @@ static func dir_to_strn(dir: Direction) -> StringName:
 # NOTE: if the direction does not match any cardinal directions then
 #       Direction.NONE is returned
 static func vec_to_dir(vec: Vector2) -> Direction:
-    match vec.normalized():
-        Vector2.LEFT:
-            return Direction.LEFT
-        Vector2.RIGHT:
-            return Direction.RIGHT
-        Vector2.UP:
-            return Direction.UP
-        Vector2.DOWN:
-            return Direction.DOWN
-        _:
-            return Direction.NONE
+    var abs = vec.normalized().abs()
+    if abs.x > abs.y:
+        return Direction.RIGHT if vec.x > 0 else Direction.LEFT
+    else:
+        return Direction.DOWN if vec.y > 0 else Direction.UP

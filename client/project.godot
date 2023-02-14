@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 NetworkHandler="*res://src/singletons/network_handler.gd"
 LevelDataManager="*res://src/singletons/level_data_manager.gd"
+WindowBridge="*res://src/singletons/window_bridge.gd"
 
 [rendering]
 

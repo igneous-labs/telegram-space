@@ -4,7 +4,7 @@ readonly BASE_DIR=$(dirname $(readlink -f "$0"))
 readonly BUILD_DIR="${BASE_DIR}/exports"
 
 # NB: change this to where godot_v4.0-beta16 binary is installed
-readonly GODOT="/opt/godot/Godot_v4.0-beta16_linux.x86_64"
+readonly GODOT="/opt/godot/Godot_v4.0-rc1_linux.x86_64"
 readonly TARGET="Web"
 
 mkdir -p ${BUILD_DIR}

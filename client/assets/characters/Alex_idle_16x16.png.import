@@ -16,9 +16,9 @@ dest_files=["res://.godot/imported/Alex_idle_16x16.png-38d9606079fc8d4e09311b619
 [params]
 
 compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
-compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=false

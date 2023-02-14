@@ -1,0 +1,34 @@
+name: Build Client
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Run the build process with Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: f8122dac91/godot-4.0-ci-exporter:rc1
+          options: -v ${{ github.workspace }}:/workdir
+          run: |
+            cd client
+            ./build-ci.sh
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: client-exports
+          path: client/exports
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: |
+          mkdir -p .vercel/output
+          echo '{ "version": 3,   "routes": [ { "src": "/(.)*", "headers": { "Cross-Origin-Resource-Policy": "cross-origin", "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Embedder-Policy": "require-corp" } } ] }' > .vercel/output/config.json
+          cp -rv client/exports .vercel/output/static
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

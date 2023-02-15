@@ -4,9 +4,9 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use world_state::WorldState;
 use super::sender_service;
 use crate::protocol::{ClientId, InstanceId, LevelId, PlayerStateData};
+use world_state::WorldState;
 
 mod world_state;
 
@@ -59,7 +59,9 @@ impl StateService {
                     }
                     Message::RemovePlayerState(client_id) => {
                         debug!("Removing client #{} from world state", client_id);
-                        world_state.remove_player_state(&client_id);
+                        if world_state.has_client(&client_id) {
+                            world_state.remove_player_state(&client_id);
+                        }
                     }
                     Message::UpdatePlayerInstance(client_id, instance_id) => {
                         debug!(
@@ -83,7 +85,9 @@ impl StateService {
                                     client_id,
                                     world_state.get_instance_level_id(&instance_id).to_owned(),
                                 ))
-                                .expect("failed to send to SenderService");
+                                .unwrap_or_else(|err| {
+                                    warn!("failed to send to SenderService: {}", err)
+                                });
                         }
                     }
                     Message::CreateInstance(instance_id, level_id) => {
@@ -111,11 +115,15 @@ impl StateService {
                 );
                 for instance_id in &instance_ids {
                     let instance_state = world_state.get_instance_state(&instance_id);
-                    sender_service_tx
-                        .send(sender_service::Message::SyncWorldState(
-                            instance_state.clone(),
-                        ))
-                        .expect("failed to send to SenderService");
+                    if !instance_state.is_empty() {
+                        sender_service_tx
+                            .send(sender_service::Message::SyncWorldState(
+                                instance_state.clone(),
+                            ))
+                            .unwrap_or_else(|err| {
+                                warn!("failed to send to SenderService: {}", err)
+                            });
+                    }
                 }
                 world_state.update_last_synced_at(&instance_ids);
             }

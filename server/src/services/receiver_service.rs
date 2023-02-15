@@ -50,7 +50,7 @@ impl ReceiverService {
                             client_id,
                             responder.clone(),
                         ))
-                        .expect("failed to send to SenderService");
+                        .unwrap_or_else(|err| warn!("failed to send to SenderService: {}", err));
                 }
                 Event::Disconnect(client_id) => {
                     let client_id =
@@ -58,10 +58,10 @@ impl ReceiverService {
                     info!("Client #{} disconnected.", client_id);
                     sender_service_tx
                         .send(sender_service::Message::Deregister(client_id))
-                        .expect("failed to send to SenderService");
+                        .unwrap_or_else(|err| warn!("failed to send to SenderService: {}", err));
                     state_service_tx
                         .send(state_service::Message::RemovePlayerState(client_id))
-                        .expect("failed to send to StateService");
+                        .unwrap_or_else(|err| warn!("failed to send to StateService: {}", err));
                 }
                 Event::Message(client_id, Message::Binary(data)) => {
                     let client_id =
@@ -72,13 +72,17 @@ impl ReceiverService {
                             trace!("Received player state from client #{}", client_id);
                             state_service_tx
                                 .send(state_service::Message::UpdatePlayerState(client_id, data))
-                                .expect("failed to send to StateService");
+                                .unwrap_or_else(|err| {
+                                    warn!("failed to send to StateService: {}", err)
+                                });
                         }
                         IngressMessage::RequestLevel(level_id) => {
                             trace!("Client #{} requested level #{}", client_id, level_id);
                             level_service_tx
                                 .send(level_service::Message::SendLevel(client_id, level_id))
-                                .expect("failed to send to LevelService");
+                                .unwrap_or_else(|err| {
+                                    warn!("failed to send to StateService: {}", err)
+                                });
                         }
                         IngressMessage::PlayerInstance(instance_id) => {
                             trace!(
@@ -91,7 +95,9 @@ impl ReceiverService {
                                     client_id,
                                     instance_id,
                                 ))
-                                .expect("failed to send to StateService");
+                                .unwrap_or_else(|err| {
+                                    warn!("failed to send to StateService: {}", err)
+                                });
                         }
                     }
                 }

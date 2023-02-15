@@ -15,35 +15,35 @@ func _ready() -> void:
     self.connect_websocket()
 
 func connect_websocket() -> void:
-    var err := websocket.connect_to_url(WEBSOCKET_URL)
+    var err := self.websocket.connect_to_url(WEBSOCKET_URL)
     if err != OK:
-        set_physics_process(false)
+        self.set_physics_process(false)
         print("failed to connect to %s" % WEBSOCKET_URL)
     else:
-        set_physics_process(true)
+        self.set_physics_process(true)
         print("connected to %s" % WEBSOCKET_URL)
 
 func _physics_process(_delta: float) -> void:
-    websocket.poll()
-    match websocket.get_ready_state():
+    self.websocket.poll()
+    match self.websocket.get_ready_state():
         WebSocketPeer.STATE_OPEN:
-            while websocket.get_available_packet_count():
+            while self.websocket.get_available_packet_count():
                 # TODO: consider making this concurrent
-                #self.emit_signal(&"received_message", websocket.get_packet())
-                self.handle_message(websocket.get_packet())
+                #self.emit_signal(&"received_message", self.websocket.get_packet())
+                self.handle_message(self.websocket.get_packet())
         WebSocketPeer.STATE_CLOSING:
             # Keep polling to achieve proper close.
             pass
         WebSocketPeer.STATE_CLOSED:
-            var code = websocket.get_close_code()
-            var reason = websocket.get_close_reason()
+            var code = self.websocket.get_close_code()
+            var reason = self.websocket.get_close_reason()
             print("WebSocket closed with code: %d, reason %s. Clean: %s" % [
                 code,
                 reason,
                 code != -1,
             ])
             self.initialized = false
-            set_physics_process(false) # Stop processing.
+            self.set_physics_process(false) # Stop processing.
 
 func handle_message(payload: PackedByteArray) -> void:
     var message = Protocol.deserialize_message(payload)
@@ -66,7 +66,7 @@ func handle_message(payload: PackedByteArray) -> void:
 func send_message(message_type: Protocol.MessageType, message_data: Dictionary) -> void:
     if not self.initialized:
         return
-    websocket.send(
+    self.websocket.send(
         Protocol.serialize_message(message_type, message_data),
         WebSocketPeer.WRITE_MODE_BINARY,
     )

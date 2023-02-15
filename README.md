@@ -1,8 +1,10 @@
 # Telegram Space
 ## Dependencies
- - godot 4.0 rc 1
-   - https://godotengine.org/article/release-candidate-godot-4-0-rc-1/
-   - https://downloads.tuxfamily.org/godotengine/4.0/rc1
+ - godot 4.0 rc 2
+   - https://godotengine.org/article/release-candidate-godot-4-0-rc-2/
+   - https://downloads.tuxfamily.org/godotengine/4.0/rc2
+   - after downloading and installing Godot, open a project in Godot, in top menu select `Editor -> Manage Export templates...` and click `Download and install` to install the export templates
+
  - rust 1.66.1 (90743e729 2023-01-10)
    - https://rustup.rs/
  - sfz 0.7.1 (for serving build artifacts)
@@ -11,6 +13,9 @@
    - You can also do brew install on macOS: https://github.com/weihanglo/sfz#macos
    - or just download prebuilt binary from gh: https://github.com/weihanglo/sfz#prebuilt-binaries
 
+## CI
+ - f8122dac91/godot-4.0-ci-exporter: https://hub.docker.com/r/f8122dac91/godot-4.0-ci-exporter
+
 ---
 
 ## How to Build
@@ -18,7 +23,7 @@
  - run `cargo build` in `server/`
 
 ### Client
- - option 1: export the project using godot 4.0 beta 13 editor
+ - option 1: export the project using the editor
  - option 2:
    - edit the godot binary location in `client/build.sh`
    - run the script
@@ -78,4 +83,3 @@ architecture. We won't touch this at this time.
    - can a user enter the client smoothly from telegram?
    - can it be loaded on different mobile platforms and web browsers?
    - can wasm + webgl render reliably on in-app view?
-

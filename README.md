@@ -3,6 +3,8 @@
  - godot 4.0 rc 1
    - https://godotengine.org/article/release-candidate-godot-4-0-rc-1/
    - https://downloads.tuxfamily.org/godotengine/4.0/rc1
+   - after downloading and installing Godot, open a project in Godot, in top menu select `Editor -> Manage Export templates...` and click `Download and install` to install the export templates
+
  - rust 1.66.1 (90743e729 2023-01-10)
    - https://rustup.rs/
  - sfz 0.7.1 (for serving build artifacts)
@@ -81,4 +83,3 @@ architecture. We won't touch this at this time.
    - can a user enter the client smoothly from telegram?
    - can it be loaded on different mobile platforms and web browsers?
    - can wasm + webgl render reliably on in-app view?
-

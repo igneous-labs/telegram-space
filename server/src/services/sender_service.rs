@@ -19,6 +19,7 @@ pub enum Message {
     SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
     SendLevel(ClientId, LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(ClientId, LevelId),
+    PlayerChatUserIdAcknowledge(ClientId),
 }
 
 impl SenderService {
@@ -61,19 +62,19 @@ impl SenderService {
                                 })
                                 .collect();
                             debug!("sending world state to client #{}", dest_client_id);
-                            let payload = WebsocketMessage::Binary(
-                                (&EgressMessage::WorldState(world_state_data)).into(),
-                            );
-                            let responder = clients.get(dest_client_id).unwrap();
-                            responder.send(payload);
+                            Self::try_send(
+                                dest_client_id,
+                                &clients,
+                                EgressMessage::WorldState(world_state_data),
+                            )
+                            .unwrap_or_else(|err| warn!("{}", err));
                         }
                     }
                     Message::Register(client_id, responder) => {
                         debug!("Registering client #{}", client_id);
-                        responder.send(WebsocketMessage::Binary(
-                            (&EgressMessage::Acknowledge(client_id)).into(),
-                        ));
                         clients.insert(client_id, responder);
+                        Self::try_send(&client_id, &clients, EgressMessage::Acknowledge(client_id))
+                            .unwrap_or_else(|err| warn!("{}", err));
                     }
                     Message::Deregister(client_id) => {
                         debug!("Deregistering client #{}", client_id);
@@ -84,23 +85,30 @@ impl SenderService {
                             "Sending level data for level #{} to client #{}",
                             level_id, client_id
                         );
-                        if let Some(responder) = clients.get(&client_id) {
-                            responder.send(WebsocketMessage::Binary(
-                                (&EgressMessage::LevelData(level_id, level_data)).into(),
-                            ));
-                        } else {
-                            warn!("Could not find client #{}, ignoring request", client_id);
-                        }
+                        Self::try_send(
+                            &client_id,
+                            &clients,
+                            EgressMessage::LevelData(level_id, level_data),
+                        )
+                        .unwrap_or_else(|err| warn!("{}", err));
                     }
                     Message::PlayerInstanceAcknowledge(client_id, level_id) => {
                         debug!("Sending level id #{} to client #{}", level_id, client_id);
-                        if let Some(responder) = clients.get(&client_id) {
-                            responder.send(WebsocketMessage::Binary(
-                                (&EgressMessage::PlayerInstanceAcknowledge(level_id)).into(),
-                            ));
-                        } else {
-                            warn!("Could not find client #{}, ignoring request", client_id);
-                        }
+                        Self::try_send(
+                            &client_id,
+                            &clients,
+                            EgressMessage::PlayerInstanceAcknowledge(level_id),
+                        )
+                        .unwrap_or_else(|err| warn!("{}", err));
+                    }
+                    Message::PlayerChatUserIdAcknowledge(client_id) => {
+                        debug!("Acknowledging client #{}'s chat_user_id", client_id);
+                        Self::try_send(
+                            &client_id,
+                            &clients,
+                            EgressMessage::PlayerChatUserIdAcknowledge,
+                        )
+                        .unwrap_or_else(|err| warn!("{}", err));
                     }
                 }
             }
@@ -109,5 +117,22 @@ impl SenderService {
 
     pub fn join(self) -> thread::Result<()> {
         self.thread_hdl.join()
+    }
+
+    #[inline(always)]
+    fn try_send(
+        client_id: &ClientId,
+        clients: &HashMap<ClientId, Responder>,
+        message: EgressMessage,
+    ) -> Result<(), String> {
+        if let Some(responder) = clients.get(client_id) {
+            if responder.send(WebsocketMessage::Binary((&message).into())) {
+                Ok(())
+            } else {
+                Err(format!("Client #{} disconnected, ignoring request", client_id).into())
+            }
+        } else {
+            Err(format!("Could not find client #{}, ignoring request", client_id).into())
+        }
     }
 }

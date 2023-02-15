@@ -1,8 +1,8 @@
 use log::{debug, trace, warn};
 use std::{
+    collections::HashMap,
     sync::mpsc::{Receiver, Sender},
     thread::{self, JoinHandle},
-    collections::HashMap,
 };
 
 use super::sender_service;
@@ -22,7 +22,6 @@ pub enum Message {
     UpdatePlayerInstance(ClientId, InstanceId),
     CreateInstance(InstanceId, LevelId),
     UpdatePlayerChatUserId(ClientId, Vec<u8>),
-
 }
 
 impl StateService {
@@ -34,7 +33,12 @@ impl StateService {
         let client_chat_user_id = HashMap::new();
 
         Self {
-            thread_hdl: Self::spawn_service(world_state, client_chat_user_id, message_rx, sender_service_tx),
+            thread_hdl: Self::spawn_service(
+                world_state,
+                client_chat_user_id,
+                message_rx,
+                sender_service_tx,
+            ),
         }
     }
 
@@ -114,12 +118,23 @@ impl StateService {
                         }
                     }
                     Message::UpdatePlayerChatUserId(client_id, chat_id) => {
-                        debug!("Updating client #{}'s chat id to '{}'", client_id, String::from_utf8(chat_id.clone()).unwrap());
+                        debug!(
+                            "Updating client #{}'s chat id to '{}'",
+                            client_id,
+                            String::from_utf8(chat_id.clone()).unwrap()
+                        );
                         // TODO: think about invariants
                         //  - client_id exists in world_state?
                         //  - client_id is not part of an instance?
                         // For now just populate the client_chat_id map
                         client_chat_user_id.insert(client_id, chat_id);
+                        sender_service_tx
+                            .send(sender_service::Message::PlayerChatUserIdAcknowledge(
+                                client_id,
+                            ))
+                            .unwrap_or_else(|err| {
+                                warn!("failed to send to SenderService: {}", err)
+                            });
                     }
                 }
             }

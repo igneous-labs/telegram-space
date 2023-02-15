@@ -33,6 +33,7 @@ pub enum EgressMessageType {
     WorldState = 2,
     LevelData = 4,
     PlayerInstanceAcknowledge = 6,
+    PlayerChatUserIdAcknowledge = 8,
 }
 
 #[derive(Debug)]
@@ -42,6 +43,7 @@ pub enum EgressMessage {
     WorldState(Vec<WorldStateEntry>),
     LevelData(LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(InstanceId),
+    PlayerChatUserIdAcknowledge,
 }
 
 // Deserialization
@@ -133,6 +135,13 @@ impl From<&EgressMessage> for Vec<u8> {
             ]
             .concat()
             .to_vec(),
+            EgressMessage::PlayerChatUserIdAcknowledge => {
+                [(u8::from(EgressMessageType::PlayerChatUserIdAcknowledge))
+                    .to_le_bytes()
+                    .to_vec()]
+                .concat()
+                .to_vec()
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ pub enum IngressMessageType {
     PlayerState = 1,
     RequestLevel = 3,
     PlayerInstance = 5,
-    PlayerChatId = 7,
+    PlayerChatUserId = 7,
 }
 
 #[derive(Debug)]
@@ -23,7 +23,7 @@ pub enum IngressMessage {
     PlayerState(PlayerStateData),
     RequestLevel(LevelId),
     PlayerInstance(InstanceId),
-    PlayerChatId(Vec<u8>),
+    PlayerChatUserId(Vec<u8>),
 }
 
 #[derive(IntoPrimitive, TryFromPrimitive, Eq, PartialEq)]
@@ -87,9 +87,9 @@ impl TryFrom<&[u8]> for IngressMessage {
                 }
                 Self::PlayerInstance(u64::from_le_bytes(data[1..=8].try_into().unwrap()))
             }
-            IngressMessageType::PlayerChatId => {
+            IngressMessageType::PlayerChatUserId => {
                 // variable size data
-                Self::PlayerChatId(data[1..].try_into().unwrap())
+                Self::PlayerChatUserId(data[1..].try_into().unwrap())
             }
         };
         Ok(msg)

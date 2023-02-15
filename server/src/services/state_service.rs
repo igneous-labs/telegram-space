@@ -21,7 +21,8 @@ pub enum Message {
     RemovePlayerState(ClientId),
     UpdatePlayerInstance(ClientId, InstanceId),
     CreateInstance(InstanceId, LevelId),
-    UpdatePlayerChatId(ClientId, Vec<u8>),
+    UpdatePlayerChatUserId(ClientId, Vec<u8>),
+
 }
 
 impl StateService {
@@ -30,16 +31,16 @@ impl StateService {
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
         let world_state = WorldState::new();
-        let client_chat_id = HashMap::new();
+        let client_chat_user_id = HashMap::new();
 
         Self {
-            thread_hdl: Self::spawn_service(world_state, client_chat_id, message_rx, sender_service_tx),
+            thread_hdl: Self::spawn_service(world_state, client_chat_user_id, message_rx, sender_service_tx),
         }
     }
 
     fn spawn_service(
         mut world_state: WorldState,
-        mut client_chat_id: HashMap<ClientId, Vec<u8>>,
+        mut client_chat_user_id: HashMap<ClientId, Vec<u8>>,
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> JoinHandle<()> {
@@ -67,8 +68,8 @@ impl StateService {
                             world_state.remove_player_state(&client_id);
                         }
                         debug!("Removing client #{} from client_chat_id map", client_id);
-                        if client_chat_id.contains_key(&client_id) {
-                            client_chat_id.remove(&client_id);
+                        if client_chat_user_id.contains_key(&client_id) {
+                            client_chat_user_id.remove(&client_id);
                         }
                     }
                     Message::UpdatePlayerInstance(client_id, instance_id) => {
@@ -112,13 +113,13 @@ impl StateService {
                             world_state.add_instance(&instance_id, &level_id);
                         }
                     }
-                    Message::UpdatePlayerChatId(client_id, chat_id) => {
+                    Message::UpdatePlayerChatUserId(client_id, chat_id) => {
                         debug!("Updating client #{}'s chat id to '{}'", client_id, String::from_utf8(chat_id.clone()).unwrap());
                         // TODO: think about invariants
                         //  - client_id exists in world_state?
                         //  - client_id is not part of an instance?
                         // For now just populate the client_chat_id map
-                        client_chat_id.insert(client_id, chat_id);
+                        client_chat_user_id.insert(client_id, chat_id);
                     }
                 }
             }

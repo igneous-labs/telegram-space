@@ -5,7 +5,7 @@ signal received_world_state(world_state: Dictionary)
 signal received_player_instance_acknowledge(level_id: int)
 
 var websocket := WebSocketPeer.new()
-const WEBSOCKET_URL := "ws://localhost:1337"
+const WEBSOCKET_URL := "ws://167.71.203.13:1337"
 
 var initialized := false
 # Server's identifier for client, received with ACKNOWLEDGE message (see types/protocol.gd)

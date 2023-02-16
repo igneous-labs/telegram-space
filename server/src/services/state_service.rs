@@ -84,6 +84,9 @@ impl StateService {
                         if !world_state.has_instance(&instance_id) {
                             warn!("Could not find instance #{}, ignoring", instance_id);
                         } else {
+                            // TODO:
+                            //  - send chat_user_id of the entering client to every client in the instance
+                            //  - send chat_user_ids in the instance to entering client
                             if !world_state.has_client(&client_id) {
                                 debug!("Adding client #{} to instance #{}", client_id, instance_id);
                                 // Add case
@@ -101,6 +104,31 @@ impl StateService {
                                 .unwrap_or_else(|err| {
                                     warn!("failed to send to SenderService: {}", err)
                                 });
+                            //sender_service_tx
+                            //    .send(sender_service::Message::SyncChatUserId(
+                            //        client_id,
+                            //        client_chat_user_id.get(&client_id).unwrap().to_owned(),
+                            //        world_state
+                            //            .get_instance_state(&instance_id)
+                            //            .keys()
+                            //            .filter_map(|instance_client_id| {
+                            //                if &client_id == instance_client_id {
+                            //                    None
+                            //                } else {
+                            //                    Some((
+                            //                        instance_client_id.to_owned(),
+                            //                        client_chat_user_id
+                            //                            .get(instance_client_id)
+                            //                            .unwrap()
+                            //                            .to_owned(),
+                            //                    ))
+                            //                }
+                            //            })
+                            //            .collect(),
+                            //    ))
+                            //    .unwrap_or_else(|err| {
+                            //        warn!("failed to send to SenderService: {}", err)
+                            //    });
                         }
                     }
                     Message::CreateInstance(instance_id, level_id) => {

@@ -20,6 +20,7 @@ pub enum Message {
     SendLevel(ClientId, LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(ClientId, LevelId),
     PlayerChatUserIdAcknowledge(ClientId),
+    SyncChatUserId(ClientId, Vec<u8>, Vec<(ClientId, Vec<u8>)>),
 }
 
 impl SenderService {
@@ -40,7 +41,7 @@ impl SenderService {
                 trace!("Received {:?}", msg);
                 match msg {
                     Message::SyncWorldState(world_state) => {
-                        trace!(
+                        debug!(
                             "Broadcasting world state to clients: {:?}",
                             world_state.keys()
                         );
@@ -61,7 +62,7 @@ impl SenderService {
                                     }
                                 })
                                 .collect();
-                            debug!("sending world state to client #{}", dest_client_id);
+                            trace!("sending world state to client #{}", dest_client_id);
                             Self::try_send(
                                 dest_client_id,
                                 &clients,
@@ -109,6 +110,19 @@ impl SenderService {
                             EgressMessage::PlayerChatUserIdAcknowledge,
                         )
                         .unwrap_or_else(|err| warn!("{}", err));
+                    }
+                    Message::SyncChatUserId(client_id, chat_user_id, instance_chat_user_ids) => {
+                        debug!(
+                            "Syncing chat user id {} of client #{}",
+                            String::from_utf8(chat_user_id).unwrap(),
+                            client_id
+                        );
+                        //Self::try_send(
+                        //    &client_id,
+                        //    &clients,
+                        //    EgressMessage::
+                        //)
+                        //.unwrap_or_else(|err| warn!("{}", err));
                     }
                 }
             }

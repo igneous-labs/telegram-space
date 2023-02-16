@@ -99,6 +99,15 @@ impl ReceiverService {
                                     warn!("failed to send to StateService: {}", err)
                                 });
                         }
+                        IngressMessage::PlayerChatUserId(chat_id) => {
+                            state_service_tx
+                                .send(state_service::Message::UpdatePlayerChatUserId(
+                                    client_id, chat_id,
+                                ))
+                                .unwrap_or_else(|err| {
+                                    warn!("failed to send to StateService: {}", err)
+                                });
+                        }
                     }
                 }
                 unidentified_message => {

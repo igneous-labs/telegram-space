@@ -1,5 +1,6 @@
 use log::{debug, trace, warn};
 use std::{
+    collections::HashMap,
     sync::mpsc::{Receiver, Sender},
     thread::{self, JoinHandle},
 };
@@ -20,6 +21,7 @@ pub enum Message {
     RemovePlayerState(ClientId),
     UpdatePlayerInstance(ClientId, InstanceId),
     CreateInstance(InstanceId, LevelId),
+    UpdatePlayerChatUserId(ClientId, Vec<u8>),
 }
 
 impl StateService {
@@ -28,14 +30,21 @@ impl StateService {
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
         let world_state = WorldState::new();
+        let client_chat_user_id = HashMap::new();
 
         Self {
-            thread_hdl: Self::spawn_service(world_state, message_rx, sender_service_tx),
+            thread_hdl: Self::spawn_service(
+                world_state,
+                client_chat_user_id,
+                message_rx,
+                sender_service_tx,
+            ),
         }
     }
 
     fn spawn_service(
         mut world_state: WorldState,
+        mut client_chat_user_id: HashMap<ClientId, Vec<u8>>,
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> JoinHandle<()> {
@@ -61,6 +70,10 @@ impl StateService {
                         debug!("Removing client #{} from world state", client_id);
                         if world_state.has_client(&client_id) {
                             world_state.remove_player_state(&client_id);
+                        }
+                        debug!("Removing client #{} from client_chat_id map", client_id);
+                        if client_chat_user_id.contains_key(&client_id) {
+                            client_chat_user_id.remove(&client_id);
                         }
                     }
                     Message::UpdatePlayerInstance(client_id, instance_id) => {
@@ -88,6 +101,31 @@ impl StateService {
                                 .unwrap_or_else(|err| {
                                     warn!("failed to send to SenderService: {}", err)
                                 });
+                            //sender_service_tx
+                            //    .send(sender_service::Message::SyncChatUserId(
+                            //        client_id,
+                            //        client_chat_user_id.get(&client_id).unwrap().to_owned(),
+                            //        world_state
+                            //            .get_instance_state(&instance_id)
+                            //            .keys()
+                            //            .filter_map(|instance_client_id| {
+                            //                if &client_id == instance_client_id {
+                            //                    None
+                            //                } else {
+                            //                    Some((
+                            //                        instance_client_id.to_owned(),
+                            //                        client_chat_user_id
+                            //                            .get(instance_client_id)
+                            //                            .unwrap()
+                            //                            .to_owned(),
+                            //                    ))
+                            //                }
+                            //            })
+                            //            .collect(),
+                            //    ))
+                            //    .unwrap_or_else(|err| {
+                            //        warn!("failed to send to SenderService: {}", err)
+                            //    });
                         }
                     }
                     Message::CreateInstance(instance_id, level_id) => {
@@ -104,6 +142,25 @@ impl StateService {
                             world_state.add_instance(&instance_id, &level_id);
                         }
                     }
+                    Message::UpdatePlayerChatUserId(client_id, chat_id) => {
+                        debug!(
+                            "Updating client #{}'s chat id to '{}'",
+                            client_id,
+                            String::from_utf8(chat_id.clone()).unwrap()
+                        );
+                        // TODO: think about invariants
+                        //  - client_id exists in world_state?
+                        //  - client_id is not part of an instance?
+                        // For now just populate the client_chat_id map
+                        client_chat_user_id.insert(client_id, chat_id);
+                        sender_service_tx
+                            .send(sender_service::Message::PlayerChatUserIdAcknowledge(
+                                client_id,
+                            ))
+                            .unwrap_or_else(|err| {
+                                warn!("failed to send to SenderService: {}", err)
+                            });
+                    }
                 }
             }
 
@@ -119,6 +176,19 @@ impl StateService {
                         sender_service_tx
                             .send(sender_service::Message::SyncWorldState(
                                 instance_state.clone(),
+                                instance_state
+                                    .keys()
+                                    .filter_map(|client_id| {
+                                        if client_chat_user_id.contains_key(client_id) {
+                                            Some((
+                                                client_id.to_owned(),
+                                                client_chat_user_id.get(client_id).unwrap().to_owned(),
+                                            ))
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                    .collect(),
                             ))
                             .unwrap_or_else(|err| {
                                 warn!("failed to send to SenderService: {}", err)

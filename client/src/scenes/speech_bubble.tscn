@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://b2xxoyum5xk8l"]
+
+[ext_resource type="Script" path="res://src/scenes/speech_bubble.gd" id="1_mq1qb"]
+[ext_resource type="Texture2D" uid="uid://bpjoavqrsvvfw" path="res://assets/tiles/Speech_Bubble_Border.png" id="1_x7f3c"]
+
+[node name="speech_bubble" type="Node2D"]
+script = ExtResource("1_mq1qb")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 1
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NinePatchRect" type="NinePatchRect" parent="VBoxContainer/Label"]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -11.0
+offset_top = -8.0
+offset_right = 11.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.01749, 1.14071)
+texture = ExtResource("1_x7f3c")

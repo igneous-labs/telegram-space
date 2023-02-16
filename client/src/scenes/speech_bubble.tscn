@@ -4,11 +4,17 @@
 [ext_resource type="Texture2D" uid="uid://bpjoavqrsvvfw" path="res://assets/tiles/Speech_Bubble_Border.png" id="1_x7f3c"]
 
 [node name="speech_bubble" type="Node2D"]
+position = Vector2(0, -11)
+scale = Vector2(0.684211, 0.680851)
 script = ExtResource("1_mq1qb")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+z_index = 10
+offset_left = -12.0
+offset_top = -40.0
+offset_right = 22.0
+offset_bottom = -13.0
+scale = Vector2(0.679028, 0.589744)
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
@@ -22,9 +28,9 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -11.0
+offset_left = -12.023
 offset_top = -8.0
-offset_right = 11.0
+offset_right = 9.977
 offset_bottom = 5.0
 grow_horizontal = 2
 grow_vertical = 2

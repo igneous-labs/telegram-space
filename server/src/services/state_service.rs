@@ -176,6 +176,19 @@ impl StateService {
                         sender_service_tx
                             .send(sender_service::Message::SyncWorldState(
                                 instance_state.clone(),
+                                instance_state
+                                    .keys()
+                                    .filter_map(|client_id| {
+                                        if client_chat_user_id.contains_key(client_id) {
+                                            Some((
+                                                client_id.to_owned(),
+                                                client_chat_user_id.get(client_id).unwrap().to_owned(),
+                                            ))
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                    .collect(),
                             ))
                             .unwrap_or_else(|err| {
                                 warn!("failed to send to SenderService: {}", err)

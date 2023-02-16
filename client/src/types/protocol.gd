@@ -24,12 +24,19 @@ enum MessageType {
     # TODO: write message spec
     # Server broadcasts world states (collection of player states) to clients
     # server -> client
+    # NOTE: client_chat_user_ids being part of the world state is a temporary solution
     # data = {
-    #   [client_id: u16]: {
-    #     position: Vector2,
-    #     direction: Common.Direction,
-    #     status: Common.CharacterStatus,
+    #   world_state_data: {
+    #     [client_id: u16]: {
+    #       position: Vector2,
+    #       direction: Common.Direction,
+    #       status: Common.CharacterStatus,
+    #     },
+    #   ...
     #   },
+    #   client_chat_user_ids: {
+    #     [client_id: u16]: String,
+    #   }, 
     #   ...
     # }
     # payload = [type (1), ]
@@ -100,8 +107,6 @@ static func serialize_message(type: MessageType, data: Dictionary) -> PackedByte
             payload.resize(1)
             payload.encode_u8(0, MessageType.PLAYER_CHAT_USER_ID)  # 1 byte;   (1)
             payload += data.chat_user_id.to_utf8_buffer()      # variable length
-            print("this:", payload)
-            print("that:", payload.slice(1).get_string_from_utf8())
         _:
             # These messages are not expected to be sent to server
             push_error("unexpected message type was serialized")
@@ -118,14 +123,21 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
                 },
             }
         MessageType.WORLD_STATE:
-            var world_state_data = bytes_to_var(payload.slice(1))
-            var data = {}
+            var body = bytes_to_var(payload.slice(1))
+            var world_state_data = bytes_to_var(body[0])
+            var chat_user_ids = bytes_to_var(body[1])
+            var data = {
+                "world_state_data": {},
+                "client_chat_user_ids": {},
+            }
             for player_state in world_state_data:
-                data[player_state.decode_u16(0)] = {
+                data["world_state_data"][player_state.decode_u16(0)] = {
                     "position": player_state.decode_var(2),
                     "direction": player_state.decode_u8(14),
                     "status":  player_state.decode_u8(15),
                 }
+            for chat_user_id in chat_user_ids:
+                data["client_chat_user_ids"][chat_user_id.decode_u16(0)] = chat_user_id.slice(2).get_string_from_utf8()
             return {
                 "type": MessageType.WORLD_STATE,
                 "data": data,

@@ -14,9 +14,9 @@ pub struct SenderService {
 
 #[derive(Debug)]
 pub enum Message {
-    Register(ClientId, Responder),                      // add a new client
-    Deregister(ClientId),                               // remove a disconnected client
-    SyncWorldState(HashMap<ClientId, PlayerStateData>), // broadcast the current world state
+    Register(ClientId, Responder), // add a new client
+    Deregister(ClientId),          // remove a disconnected client
+    SyncWorldState(HashMap<ClientId, PlayerStateData>, Vec<(ClientId, Vec<u8>)>), // broadcast the current world state
     SendLevel(ClientId, LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(ClientId, LevelId),
     PlayerChatUserIdAcknowledge(ClientId),
@@ -39,7 +39,7 @@ impl SenderService {
             for msg in message_rx.iter() {
                 trace!("Received {:?}", msg);
                 match msg {
-                    Message::SyncWorldState(world_state) => {
+                    Message::SyncWorldState(world_state, instance_chat_user_ids) => {
                         debug!(
                             "Broadcasting world state to clients: {:?}",
                             world_state.keys()
@@ -65,7 +65,10 @@ impl SenderService {
                             Self::try_send(
                                 dest_client_id,
                                 &clients,
-                                EgressMessage::WorldState(world_state_data),
+                                EgressMessage::WorldState(
+                                    world_state_data,
+                                    instance_chat_user_ids.clone(),
+                                ),
                             )
                             .unwrap_or_else(|err| warn!("{}", err));
                         }

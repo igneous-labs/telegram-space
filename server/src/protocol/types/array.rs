@@ -26,7 +26,11 @@ where
     T: Into<Vec<u8>>,
 {
     fn from(array: Array<T>) -> Self {
-        let len: u32 = array.0.len().try_into().expect("too big");
+        let len: u32 = array
+            .0
+            .len()
+            .try_into()
+            .expect("array size exceeded u32 max");
         let mut res = Vec::new();
         res.extend(ARRAY_MAGIC_NUMBER.to_le_bytes());
         res.extend(len.to_le_bytes());
@@ -74,5 +78,17 @@ mod test {
             ],
             res
         );
+    }
+
+    #[test]
+    fn it_serializes_array_of_client_chat_user_id() {
+        let client_id = 1u16;
+        let chat_user_id: Vec<u8> = vec![1, 2, 3, 4, 5];
+        let elements: Vec<Vec<u8>> = vec![[client_id.to_le_bytes().to_vec(), chat_user_id]
+            .concat()
+            .to_vec()];
+        let arr = Array(elements);
+        let res: Vec<u8> = arr.into();
+        assert_eq!(vec![28, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 0], res);
     }
 }

@@ -1,8 +1,8 @@
 # Telegram Space
 ## Dependencies
- - godot 4.0 rc 1
-   - https://godotengine.org/article/release-candidate-godot-4-0-rc-1/
-   - https://downloads.tuxfamily.org/godotengine/4.0/rc1
+ - godot 4.0 rc 2
+   - https://godotengine.org/article/release-candidate-godot-4-0-rc-2/
+   - https://downloads.tuxfamily.org/godotengine/4.0/rc2
    - after downloading and installing Godot, open a project in Godot, in top menu select `Editor -> Manage Export templates...` and click `Download and install` to install the export templates
 
  - rust 1.66.1 (90743e729 2023-01-10)
@@ -23,7 +23,7 @@
  - run `cargo build` in `server/`
 
 ### Client
- - option 1: export the project using godot 4.0 beta 13 editor
+ - option 1: export the project using the editor
  - option 2:
    - edit the godot binary location in `client/build.sh`
    - run the script

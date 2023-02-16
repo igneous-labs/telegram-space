@@ -65,6 +65,18 @@ enum MessageType {
     # }
     # payload = [type(1), level_id(8)]
     PLAYER_INSTANCE_ACKNOWLEDGE = 6,
+    # Client registers player's chat user id (matrix id)
+    # client -> server
+    # data = {
+    #   chat_user_id: String,
+    # }
+    # payload = [type(1), chat_user_id(variable)]
+    PLAYER_CHAT_USER_ID = 7,
+    # Server acknowledges for player chat user id registration
+    # server -> client
+    # data = {}
+    # payload = [type(1)]
+    PLAYER_CHAT_USER_ID_ACKNOWLEDGE = 8,
 }
 
 static func serialize_message(type: MessageType, data: Dictionary) -> PackedByteArray:
@@ -84,6 +96,12 @@ static func serialize_message(type: MessageType, data: Dictionary) -> PackedByte
             payload.resize(9)
             payload.encode_u8(0, MessageType.PLAYER_INSTANCE)  # 1 byte;   (1)
             payload.encode_u64(1, data.instance_id)            # 8 byte;   (9)
+        MessageType.PLAYER_CHAT_USER_ID:
+            payload.resize(1)
+            payload.encode_u8(0, MessageType.PLAYER_CHAT_USER_ID)  # 1 byte;   (1)
+            payload += data.chat_user_id.to_utf8_buffer()      # variable length
+            print("this:", payload)
+            print("that:", payload.slice(1).get_string_from_utf8())
         _:
             # These messages are not expected to be sent to server
             push_error("unexpected message type was serialized")
@@ -122,14 +140,17 @@ static func deserialize_message(payload: PackedByteArray) -> Dictionary:
                 }
             }
         MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:
-            var decompressed_size = payload.decode_u32(9)
             return {
                 "type": MessageType.PLAYER_INSTANCE_ACKNOWLEDGE,
                 "data": {
                     "level_id": payload.decode_u64(1),
                 }
             }
+        MessageType.PLAYER_CHAT_USER_ID_ACKNOWLEDGE:
+            return {
+                "type": MessageType.PLAYER_CHAT_USER_ID_ACKNOWLEDGE,
+            }
         _:
             # These messages are not expected to come into client
-            push_error("unexpected message type was deserialized")
+            push_error("unexpected message type was deserialized: ", type)
             return {}

@@ -20,7 +20,6 @@ pub enum Message {
     SendLevel(ClientId, LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(ClientId, LevelId),
     PlayerChatUserIdAcknowledge(ClientId),
-    SyncChatUserId(ClientId, Vec<u8>, Vec<(ClientId, Vec<u8>)>),
 }
 
 impl SenderService {
@@ -110,19 +109,6 @@ impl SenderService {
                             EgressMessage::PlayerChatUserIdAcknowledge,
                         )
                         .unwrap_or_else(|err| warn!("{}", err));
-                    }
-                    Message::SyncChatUserId(client_id, chat_user_id, instance_chat_user_ids) => {
-                        debug!(
-                            "Syncing chat user id {} of client #{}",
-                            String::from_utf8(chat_user_id).unwrap(),
-                            client_id
-                        );
-                        //Self::try_send(
-                        //    &client_id,
-                        //    &clients,
-                        //    EgressMessage::
-                        //)
-                        //.unwrap_or_else(|err| warn!("{}", err));
                     }
                 }
             }

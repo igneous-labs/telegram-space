@@ -84,9 +84,6 @@ impl StateService {
                         if !world_state.has_instance(&instance_id) {
                             warn!("Could not find instance #{}, ignoring", instance_id);
                         } else {
-                            // TODO:
-                            //  - send chat_user_id of the entering client to every client in the instance
-                            //  - send chat_user_ids in the instance to entering client
                             if !world_state.has_client(&client_id) {
                                 debug!("Adding client #{} to instance #{}", client_id, instance_id);
                                 // Add case

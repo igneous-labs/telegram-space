@@ -19,9 +19,6 @@ var _on_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_msg"))
 var _msg_port
 
 func _ready():
-    # DELETEME: for testing client without chatapp
-    self.chat_user_id = "helloworld"
-    
     var window = JavaScriptBridge.get_interface("window")
     if window == null:
         return

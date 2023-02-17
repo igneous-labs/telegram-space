@@ -119,6 +119,3 @@ theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
-
-[node name="CheckLoadingInterval" type="Timer" parent="."]
-wait_time = 0.5

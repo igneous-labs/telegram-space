@@ -1,6 +1,7 @@
 # NetworkHandler singleton (autoloaded)
 extends Node
 
+signal initialized
 signal received_world_state(world_state: Dictionary)
 signal received_player_instance_acknowledge(level_id: int)
 signal received_player_chat_user_id_acknowledge
@@ -8,7 +9,7 @@ signal received_player_chat_user_id_acknowledge
 var websocket := WebSocketPeer.new()
 const WEBSOCKET_URL := "ws://localhost:1337"
 
-var initialized := false
+var is_initialized := false
 # Server's identifier for client, received with ACKNOWLEDGE message (see types/protocol.gd)
 var client_id: int = -1
 
@@ -43,7 +44,7 @@ func _physics_process(_delta: float) -> void:
                 reason,
                 code != -1,
             ])
-            self.initialized = false
+            self.is_initialized = false
             self.set_physics_process(false) # Stop processing.
 
 func handle_message(payload: PackedByteArray) -> void:
@@ -52,7 +53,8 @@ func handle_message(payload: PackedByteArray) -> void:
         Protocol.MessageType.ACKNOWLEDGE:
             # TODO: change this to how PLAYER_INSTANCE awaits for its acknowledge message
             self.client_id = message.data.client_id
-            self.initialized = true
+            self.is_initialized = true
+            emit_signal(&"initialized")
         Protocol.MessageType.WORLD_STATE:
             message.data.world_state_data.erase(self.client_id)
             message.data.client_chat_user_ids.erase(self.client_id)
@@ -68,7 +70,7 @@ func handle_message(payload: PackedByteArray) -> void:
             print("Unhandled message: ", message)
 
 func send_message(message_type: Protocol.MessageType, message_data: Dictionary) -> void:
-    if not self.initialized:
+    if not self.is_initialized:
         return
     self.websocket.send(
         Protocol.serialize_message(message_type, message_data),

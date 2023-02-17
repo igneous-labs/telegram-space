@@ -6,7 +6,11 @@ const SpeechBubble := preload("res://src/scenes/components/speech_bubble.tscn")
 
 @export var character_direction: Common.Direction
 @export var character_status: Common.CharacterStatus
-var chat_user_id: String = ""
+var chat_user_id: String = "":
+    # DELETEME
+    set(id):
+        print("The chat_user_id of Character %s is %s" % [self, id])
+        chat_user_id = id
 
 func _ready() -> void:
     WindowBridge.received_window_message.connect(self.handle_window_message)

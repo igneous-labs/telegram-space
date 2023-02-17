@@ -11,7 +11,7 @@ enum MessageType {
 const MATRIX_ID_KEY := "matrix_id"
 const BODY_KEY := "body"
 
-var chat_user_id: String = "hello-world-0"
+var chat_user_id: String = ""
 
 var _on_init_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_init_msg"))
 var _on_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_msg"))
@@ -19,18 +19,13 @@ var _on_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_msg"))
 var _msg_port
 
 func _ready():
-    self.test_sending_chat_message()
+    # DELETEME: for testing client without chatapp
+    self.chat_user_id = "helloworld"
+    
     var window = JavaScriptBridge.get_interface("window")
     if window == null:
         return
     window.addEventListener("message", self._on_init_msg_ref)
-
-# DELETEM: test chat message
-func test_sending_chat_message() -> void:
-    var test_msg := [{ "data": '{ "matrix_id": "hello-world-0", "body": "It works!" }' }]
-    while true:
-        self._on_msg(test_msg)
-        await self.get_tree().create_timer(2.0).timeout
 
 # Init msg schema
 # { matrix_id: string }
@@ -46,7 +41,7 @@ func _on_init_msg(args) -> void:
         or typeof(parsed[MATRIX_ID_KEY]) != TYPE_STRING:
             return
     
-    # TODO: send this to server
+    # TODO: send this to server (temporarily, this is done in loader to sync messaging order between PLAYER_CHAT_USER_ID and PLAYER_INSTANCE messages)
     self.chat_user_id = parsed[MATRIX_ID_KEY]
     
     self._msg_port = msg_port

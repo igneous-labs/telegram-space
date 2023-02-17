@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://src/scenes/components/speech_bubble_container.gd" id="1_438md"]
 
-[node name="VBoxContainer" type="VBoxContainer"]
+[node name="SpeechBubbleContainer" type="VBoxContainer"]
 custom_minimum_size = Vector2(48, 23)
 anchors_preset = 7
 anchor_left = 0.5
@@ -17,3 +17,4 @@ grow_horizontal = 2
 grow_vertical = 0
 alignment = 2
 script = ExtResource("1_438md")
+metadata/_edit_lock_ = true

@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://sme5qotef8ac"]
+[gd_scene load_steps=6 format=3 uid="uid://sme5qotef8ac"]
 
 [ext_resource type="Script" path="res://src/scenes/components/speech_bubble.gd" id="1_bsj47"]
 [ext_resource type="Texture2D" uid="uid://bpjoavqrsvvfw" path="res://assets/tiles/Speech_Bubble_Border.png" id="2_mx3ng"]
 [ext_resource type="FontFile" uid="uid://b1y1kdt41kqv2" path="res://assets/fonts/PixelOperatorMono.ttf" id="3_qjgtf"]
+[ext_resource type="FontFile" uid="uid://2eou8q6rnbbu" path="res://assets/fonts/NotoColorEmoji-Regular.ttf" id="4_83vj8"]
+
+[sub_resource type="FontVariation" id="FontVariation_pybum"]
+base_font = ExtResource("3_qjgtf")
+fallbacks = Array[Font]([ExtResource("4_83vj8")])
 
 [node name="SpeechBubble" type="MarginContainer"]
 custom_minimum_size = Vector2(32, 20)
@@ -16,6 +21,7 @@ scale = Vector2(0.8, 0.8)
 size_flags_horizontal = 3
 script = ExtResource("1_bsj47")
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 self_modulate = Color(0.541176, 0.541176, 0.541176, 0.52549)
@@ -25,6 +31,7 @@ patch_margin_left = 6
 patch_margin_top = 3
 patch_margin_right = 6
 patch_margin_bottom = 3
+metadata/_edit_lock_ = true
 
 [node name="M" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -32,6 +39,7 @@ theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
+metadata/_edit_lock_ = true
 
 [node name="Label" type="Label" parent="M"]
 layout_mode = 2
@@ -42,10 +50,11 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/shadow_outline_size = 1
-theme_override_fonts/font = ExtResource("3_qjgtf")
+theme_override_fonts/font = SubResource("FontVariation_pybum")
 theme_override_font_sizes/font_size = 14
 text = "hello world"
 horizontal_alignment = 1
 vertical_alignment = 1
+metadata/_edit_lock_ = true
 
 [node name="ClearTimer" type="Timer" parent="."]

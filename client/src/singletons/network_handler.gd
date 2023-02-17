@@ -3,6 +3,7 @@ extends Node
 
 signal received_world_state(world_state: Dictionary)
 signal received_player_instance_acknowledge(level_id: int)
+signal received_player_chat_user_id_acknowledge
 
 var websocket := WebSocketPeer.new()
 const WEBSOCKET_URL := "ws://localhost:1337"
@@ -53,13 +54,16 @@ func handle_message(payload: PackedByteArray) -> void:
             self.client_id = message.data.client_id
             self.initialized = true
         Protocol.MessageType.WORLD_STATE:
-            message.data.erase(self.client_id)
+            message.data.world_state_data.erase(self.client_id)
+            message.data.client_chat_user_ids.erase(self.client_id)
             emit_signal(&"received_world_state", message.data)
         Protocol.MessageType.LEVEL_DATA:
             # TODO: change this to how PLAYER_INSTANCE awaits for its acknowledge message
             LevelDataManager.insert_level(message.data.level_id, message.data.level_data)
         Protocol.MessageType.PLAYER_INSTANCE_ACKNOWLEDGE:
             emit_signal(&"received_player_instance_acknowledge", message.data.level_id)
+        Protocol.MessageType.PLAYER_CHAT_USER_ID_ACKNOWLEDGE:
+            emit_signal(&"received_player_chat_user_id_acknowledge")
         _:
             print("Unhandled message: ", message)
 

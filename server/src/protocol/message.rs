@@ -14,6 +14,7 @@ pub enum IngressMessageType {
     PlayerState = 1,
     RequestLevel = 3,
     PlayerInstance = 5,
+    PlayerChatUserId = 7,
 }
 
 #[derive(Debug)]
@@ -22,6 +23,7 @@ pub enum IngressMessage {
     PlayerState(PlayerStateData),
     RequestLevel(LevelId),
     PlayerInstance(InstanceId),
+    PlayerChatUserId(Vec<u8>),
 }
 
 #[derive(IntoPrimitive, TryFromPrimitive, Eq, PartialEq)]
@@ -31,15 +33,17 @@ pub enum EgressMessageType {
     WorldState = 2,
     LevelData = 4,
     PlayerInstanceAcknowledge = 6,
+    PlayerChatUserIdAcknowledge = 8,
 }
 
 #[derive(Debug)]
 #[repr(u8)]
 pub enum EgressMessage {
     Acknowledge(ClientId),
-    WorldState(Vec<WorldStateEntry>),
+    WorldState(Vec<WorldStateEntry>, Vec<(ClientId, Vec<u8>)>),
     LevelData(LevelId, Vec<u8>),
     PlayerInstanceAcknowledge(InstanceId),
+    PlayerChatUserIdAcknowledge,
 }
 
 // Deserialization
@@ -85,6 +89,10 @@ impl TryFrom<&[u8]> for IngressMessage {
                 }
                 Self::PlayerInstance(u64::from_le_bytes(data[1..=8].try_into().unwrap()))
             }
+            IngressMessageType::PlayerChatUserId => {
+                // variable size data
+                Self::PlayerChatUserId(data[1..].try_into().unwrap())
+            }
         };
         Ok(msg)
     }
@@ -102,14 +110,31 @@ impl From<&EgressMessage> for Vec<u8> {
             ]
             .concat()
             .to_vec(),
-            EgressMessage::WorldState(world_state_data) => [
-                u8::from(EgressMessageType::WorldState)
-                    .to_le_bytes()
-                    .to_vec(),
-                Array(world_state_data.iter().map(PackedByteArray::from).collect()).into(),
-            ]
-            .concat()
-            .to_vec(),
+            EgressMessage::WorldState(world_state_data, instance_chat_user_ids) => {
+                let world_state_data: Vec<u8> =
+                    PackedByteArray(Array(world_state_data.iter().map(PackedByteArray::from).collect()).into()).into();
+                let instance_chat_user_id: Vec<u8> = PackedByteArray(Array(
+                    instance_chat_user_ids
+                        .iter()
+                        .map(|(client_id, chat_user_id)| {
+                            let inner: Vec<u8> = PackedByteArray([client_id.to_le_bytes().to_vec(), chat_user_id.to_owned()]
+                                .concat()
+                                .to_vec()
+                            ).into();
+                            inner
+                        })
+                        .collect(),
+                )
+                .into()).into();
+                [
+                    u8::from(EgressMessageType::WorldState)
+                        .to_le_bytes()
+                        .to_vec(),
+                    Array(vec![world_state_data, instance_chat_user_id]).into(),
+                ]
+                .concat()
+                .to_vec()
+            }
             EgressMessage::LevelData(level_id, compressed_level_data) => [
                 (u8::from(EgressMessageType::LevelData))
                     .to_le_bytes()
@@ -127,6 +152,13 @@ impl From<&EgressMessage> for Vec<u8> {
             ]
             .concat()
             .to_vec(),
+            EgressMessage::PlayerChatUserIdAcknowledge => {
+                [(u8::from(EgressMessageType::PlayerChatUserIdAcknowledge))
+                    .to_le_bytes()
+                    .to_vec()]
+                .concat()
+                .to_vec()
+            }
         }
     }
 }

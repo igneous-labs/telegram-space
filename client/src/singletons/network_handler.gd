@@ -7,8 +7,7 @@ signal received_player_instance_acknowledge(level_id: int)
 signal received_player_chat_user_id_acknowledge
 
 var websocket := WebSocketPeer.new()
-const WEBSOCKET_URL := "ws://localhost:1337"
-#const WEBSOCKET_URL := "wss://space.melchior.info:1337"
+const WEBSOCKET_URL := "wss://space.melchior.info:1338"
 
 var is_initialized := false
 # Server's identifier for client, received with ACKNOWLEDGE message (see types/protocol.gd)

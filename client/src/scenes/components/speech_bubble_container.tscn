@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://cchwmskqnphwa"]
+
+[ext_resource type="Script" path="res://src/scenes/components/speech_bubble_container.gd" id="1_438md"]
+
+[node name="VBoxContainer" type="VBoxContainer"]
+custom_minimum_size = Vector2(48, 23)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -616.5
+offset_top = -753.0
+offset_right = -535.5
+offset_bottom = -679.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 2
+script = ExtResource("1_438md")

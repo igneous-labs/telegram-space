@@ -7,6 +7,11 @@ const SPEED: float = 200.
 # NOTE: a nullable variant that when set to a Vector2 gets processed by _physics_process
 var move_target = null
 
+func _ready() -> void:
+    super()
+    # TODO: find a better way to initialize chat_user_id field
+    self.initialize_chat_user_id()
+
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
         var player_screen_position = self.get_global_transform_with_canvas().get_origin()
@@ -51,6 +56,15 @@ func publish_player_state() -> void:
         "direction": self.character_direction,
         "status": self.character_status,
     })
+
+# TODO: find a better way to initialize chat_user_id field
+# NOTE: meant to be used as a corutine
+func initialize_chat_user_id() -> void:
+    while self.chat_user_id.is_empty():
+        if not WindowBridge.chat_user_id.is_empty():
+            self.chat_user_id = WindowBridge.chat_user_id
+        else:
+            await self.get_tree().create_timer(1.0).timeout
 
 func setup(initial_state: Dictionary) -> void:
     super._setup(initial_state)

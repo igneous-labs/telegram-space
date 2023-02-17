@@ -11,6 +11,8 @@ func _ready() -> void:
     $CheckLoadingInterval.start()
 
 func check_loading() -> void:
+    # wait until NetworkHandler is initialized
+    # TODO: consider changing this to await (see how PlayerInstance awaits PlayerInstanceAcknowledge)
     if not NetworkHandler.initialized:
         return
     $CheckLoadingInterval.stop()

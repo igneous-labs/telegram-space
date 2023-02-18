@@ -7,7 +7,7 @@ use std::{
 
 use super::{level_service, sender_service, state_service};
 use crate::{
-    consts::PORT,
+    envs::{parse_env_or, DEFAULT_PORT},
     protocol::{ClientId, IngressMessage},
 };
 
@@ -21,7 +21,9 @@ impl ReceiverService {
         level_service_tx: Sender<level_service::Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let event_hub = simple_websockets::launch(PORT).expect("Failed to listen");
+        let port = parse_env_or("PORT", DEFAULT_PORT);
+        info!("Initializing ReceiverService: PORT = {}", port);
+        let event_hub = simple_websockets::launch(port).expect("Failed to listen to port");
 
         Self {
             thread_hdl: Self::spawn_service(
@@ -99,10 +101,11 @@ impl ReceiverService {
                                     warn!("failed to send to StateService: {}", err)
                                 });
                         }
-                        IngressMessage::PlayerChatUserId(chat_id) => {
+                        IngressMessage::PlayerChatUserId(chat_user_id) => {
                             state_service_tx
                                 .send(state_service::Message::UpdatePlayerChatUserId(
-                                    client_id, chat_id,
+                                    client_id,
+                                    chat_user_id,
                                 ))
                                 .unwrap_or_else(|err| {
                                     warn!("failed to send to StateService: {}", err)

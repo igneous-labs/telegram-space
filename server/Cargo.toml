@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15.0"
+flexi_logger = "0.25.1"
 log = "0.4"
 num_enum = "0.5.7"
 simple-websockets = "0.1.4"
-simple_logger = "4.0"

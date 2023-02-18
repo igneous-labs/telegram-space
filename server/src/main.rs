@@ -1,20 +1,17 @@
-use log::{info, LevelFilter};
-use simple_logger::SimpleLogger;
+use dotenv::dotenv;
+use log::info;
 use std::sync::mpsc::channel;
 
-mod consts;
+mod envs;
+mod logger;
 mod protocol;
 mod services;
 
 // NOTE: client_id is downcasted from u64 to u16, and the implementation assumes that
 //       the max connection is kept at u16 max.
 fn main() {
-    SimpleLogger::new()
-        .with_level(LevelFilter::Off)
-        .with_module_level("telegram_space_server", LevelFilter::Debug)
-        .with_utc_timestamps()
-        .init()
-        .unwrap();
+    dotenv().ok();
+    logger::init_logger();
 
     let (state_service_tx, state_service_rx) = channel();
     let (level_service_tx, level_service_rx) = channel();
@@ -25,6 +22,7 @@ fn main() {
     let receiver_service =
         // TODO: remove clone from state_service_tx
         services::ReceiverService::new(state_service_tx.clone(), level_service_tx, sender_service_tx);
+
     // DELETEME: temporarily setup testing instances
     state_service_tx
         .send(services::state_service::Message::CreateInstance(0, 0))

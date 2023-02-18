@@ -6,6 +6,7 @@ pub const DEFAULT_SYNC_INTERVAL_MS: u64 = 40;
 // Temporary directory to load level data from
 pub const DEFAULT_LEVEL_DATA_DIR: &str = "./level-data";
 pub const DEFAULT_RUST_LOG: &str = "telegram_space_server=debug";
+pub const DEFAULT_LOG_DIR: &str = "./logs";
 
 #[inline(always)]
 pub fn parse_env_or<T: FromStr>(var: &str, default: T) -> T {

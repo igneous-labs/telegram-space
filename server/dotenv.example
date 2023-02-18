@@ -3,3 +3,4 @@
 #SYNC_INTERVAL_MS=40
 #LEVEL_DATA_DIR="./level-data"
 #RUST_LOG="telegram_space_server=debug"
+#LOG_DIR="./logs"

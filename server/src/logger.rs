@@ -1,5 +1,5 @@
-use crate::envs::DEFAULT_RUST_LOG;
-use flexi_logger::{style, DeferredNow, Level, Logger, Record};
+use crate::envs::{DEFAULT_LOG_DIR, DEFAULT_RUST_LOG};
+use flexi_logger::{style, DeferredNow, FileSpec, Level, Logger, Record, WriteMode};
 use std::env;
 
 // Error => Red
@@ -41,6 +41,11 @@ pub fn init_logger() {
         .use_utc()
         .format(log_format)
         .set_palette(LOG_COLOR_PALETTE.to_string())
+        .log_to_file(
+            FileSpec::default()
+                .directory(env::var("LOG_DIR").unwrap_or(DEFAULT_LOG_DIR.to_string())),
+        )
+        .write_mode(WriteMode::BufferAndFlush)
         .start()
         .unwrap();
 }

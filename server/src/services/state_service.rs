@@ -73,7 +73,7 @@ impl StateService {
                             || world_state.get_player_state_data(&client_id) != &player_state_data
                         {
                             // upsert case
-                            debug!("Updating player state for client #{}", client_id);
+                            trace!("Updating player state for client #{}", client_id);
                             world_state.update_player_state(&client_id, player_state_data);
                         }
                     }

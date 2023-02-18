@@ -38,7 +38,6 @@ impl SenderService {
     ) -> JoinHandle<()> {
         thread::spawn(move || {
             for msg in message_rx.iter() {
-                trace!("Received {:?}", msg);
                 match msg {
                     Message::SyncWorldState(world_state, instance_chat_user_ids) => {
                         debug!(

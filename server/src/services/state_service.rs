@@ -82,7 +82,10 @@ impl StateService {
                         if world_state.has_client(&client_id) {
                             world_state.remove_player_state(&client_id);
                         }
-                        debug!("Removing client #{} from client_chat_user_id map", client_id);
+                        debug!(
+                            "Removing client #{} from client_chat_user_id map",
+                            client_id
+                        );
                         if client_chat_user_id.contains_key(&client_id) {
                             client_chat_user_id.remove(&client_id);
                         }
@@ -98,7 +101,7 @@ impl StateService {
                             if !world_state.has_client(&client_id) {
                                 debug!("Adding client #{} to instance #{}", client_id, instance_id);
                                 // Add case
-                                world_state.add_player_to_instance(&client_id, &instance_id)
+                                world_state.add_player_to_instance(&client_id, &instance_id);
                             } else {
                                 debug!("Moving client #{} to instance #{}", client_id, instance_id);
                                 // Move case
@@ -112,31 +115,6 @@ impl StateService {
                                 .unwrap_or_else(|err| {
                                     warn!("failed to send to SenderService: {}", err)
                                 });
-                            //sender_service_tx
-                            //    .send(sender_service::Message::SyncChatUserId(
-                            //        client_id,
-                            //        client_chat_user_id.get(&client_id).unwrap().to_owned(),
-                            //        world_state
-                            //            .get_instance_state(&instance_id)
-                            //            .keys()
-                            //            .filter_map(|instance_client_id| {
-                            //                if &client_id == instance_client_id {
-                            //                    None
-                            //                } else {
-                            //                    Some((
-                            //                        instance_client_id.to_owned(),
-                            //                        client_chat_user_id
-                            //                            .get(instance_client_id)
-                            //                            .unwrap()
-                            //                            .to_owned(),
-                            //                    ))
-                            //                }
-                            //            })
-                            //            .collect(),
-                            //    ))
-                            //    .unwrap_or_else(|err| {
-                            //        warn!("failed to send to SenderService: {}", err)
-                            //    });
                         }
                     }
                     Message::CreateInstance(instance_id, level_id) => {
@@ -178,7 +156,7 @@ impl StateService {
             let instance_ids = world_state.get_instance_ids_to_sync(&sync_interval);
             if !instance_ids.is_empty() {
                 debug!(
-                    "Sending world instances #{:?} states to SenderService",
+                    "Sending the state of world instances #{:?} to SenderService",
                     instance_ids
                 );
                 for instance_id in &instance_ids {

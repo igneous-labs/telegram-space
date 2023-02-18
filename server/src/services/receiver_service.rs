@@ -104,7 +104,8 @@ impl ReceiverService {
                         IngressMessage::PlayerChatUserId(chat_user_id) => {
                             state_service_tx
                                 .send(state_service::Message::UpdatePlayerChatUserId(
-                                    client_id, chat_user_id,
+                                    client_id,
+                                    chat_user_id,
                                 ))
                                 .unwrap_or_else(|err| {
                                     warn!("failed to send to StateService: {}", err)

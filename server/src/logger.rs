@@ -10,7 +10,8 @@ use std::env;
 // Debug => Pruple
 // Trace => Grey
 const LOG_COLOR_PALETTE: &str = "1;3;6;5;8";
-const MAX_LOG_FILE_SIZE_BYTES: u64 = 10240;
+// 10 Mb
+const MAX_LOG_FILE_SIZE_BYTES: u64 = 10485760;
 
 fn log_format(
     w: &mut dyn std::io::Write,

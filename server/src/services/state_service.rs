@@ -82,7 +82,7 @@ impl StateService {
                         if world_state.has_client(&client_id) {
                             world_state.remove_player_state(&client_id);
                         }
-                        debug!("Removing client #{} from client_chat_id map", client_id);
+                        debug!("Removing client #{} from client_chat_user_id map", client_id);
                         if client_chat_user_id.contains_key(&client_id) {
                             client_chat_user_id.remove(&client_id);
                         }
@@ -153,17 +153,17 @@ impl StateService {
                             world_state.add_instance(&instance_id, &level_id);
                         }
                     }
-                    Message::UpdatePlayerChatUserId(client_id, chat_id) => {
+                    Message::UpdatePlayerChatUserId(client_id, chat_user_id) => {
                         debug!(
-                            "Updating client #{}'s chat id to '{}'",
+                            "Updating client #{}'s chat user id to '{}'",
                             client_id,
-                            String::from_utf8(chat_id.clone()).unwrap()
+                            String::from_utf8(chat_user_id.clone()).unwrap()
                         );
                         // TODO: think about invariants
                         //  - client_id exists in world_state?
                         //  - client_id is not part of an instance?
-                        // For now just populate the client_chat_id map
-                        client_chat_user_id.insert(client_id, chat_id);
+                        // For now just populate the client_chat_user_id map
+                        client_chat_user_id.insert(client_id, chat_user_id);
                         sender_service_tx
                             .send(sender_service::Message::PlayerChatUserIdAcknowledge(
                                 client_id,

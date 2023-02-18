@@ -111,21 +111,28 @@ impl From<&EgressMessage> for Vec<u8> {
             .concat()
             .to_vec(),
             EgressMessage::WorldState(world_state_data, instance_chat_user_ids) => {
-                let world_state_data: Vec<u8> =
-                    PackedByteArray(Array(world_state_data.iter().map(PackedByteArray::from).collect()).into()).into();
-                let instance_chat_user_id: Vec<u8> = PackedByteArray(Array(
-                    instance_chat_user_ids
-                        .iter()
-                        .map(|(client_id, chat_user_id)| {
-                            let inner: Vec<u8> = PackedByteArray([client_id.to_le_bytes().to_vec(), chat_user_id.to_owned()]
-                                .concat()
-                                .to_vec()
-                            ).into();
-                            inner
-                        })
-                        .collect(),
+                let world_state_data: Vec<u8> = PackedByteArray(
+                    Array(world_state_data.iter().map(PackedByteArray::from).collect()).into(),
                 )
-                .into()).into();
+                .into();
+                let instance_chat_user_id: Vec<u8> = PackedByteArray(
+                    Array(
+                        instance_chat_user_ids
+                            .iter()
+                            .map(|(client_id, chat_user_id)| {
+                                let inner: Vec<u8> = PackedByteArray(
+                                    [client_id.to_le_bytes().to_vec(), chat_user_id.to_owned()]
+                                        .concat()
+                                        .to_vec(),
+                                )
+                                .into();
+                                inner
+                            })
+                            .collect(),
+                    )
+                    .into(),
+                )
+                .into();
                 [
                     u8::from(EgressMessageType::WorldState)
                         .to_le_bytes()

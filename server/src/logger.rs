@@ -1,5 +1,7 @@
 use crate::envs::{DEFAULT_LOG_DIR, DEFAULT_RUST_LOG};
-use flexi_logger::{style, DeferredNow, FileSpec, Level, Logger, Record, WriteMode};
+use flexi_logger::{
+    style, Age, Cleanup, Criterion, DeferredNow, FileSpec, Level, Logger, Naming, Record, WriteMode,
+};
 use std::env;
 
 // Error => Red
@@ -8,6 +10,7 @@ use std::env;
 // Debug => Pruple
 // Trace => Grey
 const LOG_COLOR_PALETTE: &str = "1;3;6;5;8";
+const MAX_LOG_FILE_SIZE_BYTES: u64 = 10240;
 
 fn log_format(
     w: &mut dyn std::io::Write,
@@ -44,6 +47,14 @@ pub fn init_logger() {
         .log_to_file(
             FileSpec::default()
                 .directory(env::var("LOG_DIR").unwrap_or(DEFAULT_LOG_DIR.to_string())),
+        )
+        .rotate(
+            Criterion::AgeOrSize(Age::Day, MAX_LOG_FILE_SIZE_BYTES),
+            Naming::Timestamps,
+            // TODO: cap the max # of log files in prod
+            //       for now, don't cleanup
+            // Cleanup::KeepLogFiles(20),
+            Cleanup::Never,
         )
         .write_mode(WriteMode::BufferAndFlush)
         .start()

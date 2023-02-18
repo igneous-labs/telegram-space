@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
 use std::sync::mpsc::channel;
@@ -9,6 +10,7 @@ mod services;
 // NOTE: client_id is downcasted from u64 to u16, and the implementation assumes that
 //       the max connection is kept at u16 max.
 fn main() {
+    dotenv().ok();
     SimpleLogger::new()
         .with_level(LevelFilter::Off)
         .with_module_level("telegram_space_server", LevelFilter::Debug)

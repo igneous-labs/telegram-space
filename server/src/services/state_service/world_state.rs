@@ -1,9 +1,9 @@
-use std::{collections::HashMap, time::Instant};
-
-use crate::{
-    consts::WORLD_STATE_SYNC_INTERVAL,
-    protocol::{ClientId, InstanceId, LevelId, PlayerStateData},
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
 };
+
+use crate::protocol::{ClientId, InstanceId, LevelId, PlayerStateData};
 
 #[derive(Debug)]
 struct Instance {
@@ -129,7 +129,7 @@ impl WorldState {
     }
 
     /// return instances that needs to be synced
-    pub fn get_instance_ids_to_sync(&self) -> Vec<InstanceId> {
+    pub fn get_instance_ids_to_sync(&self, interval: &Duration) -> Vec<InstanceId> {
         let now = Instant::now();
         self.instances
             .iter()
@@ -138,8 +138,7 @@ impl WorldState {
                     if instance.last_synced_at.is_none()
                         || (instance.last_updated_at.is_some()
                             && instance.last_updated_at.unwrap() > instance.last_synced_at.unwrap())
-                            && now.duration_since(instance.last_synced_at.unwrap())
-                                > WORLD_STATE_SYNC_INTERVAL
+                            && now.duration_since(instance.last_synced_at.unwrap()) > *interval
                     {
                         Some(instance_id.to_owned())
                     } else {

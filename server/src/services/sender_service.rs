@@ -1,4 +1,4 @@
-use log::{debug, trace, warn};
+use log::{debug, info, trace, warn};
 use simple_websockets::{Message as WebsocketMessage, Responder};
 use std::{
     collections::HashMap,
@@ -24,6 +24,7 @@ pub enum Message {
 
 impl SenderService {
     pub fn new(message_rx: Receiver<Message>) -> Self {
+        info!("Initializing SenderService");
         let clients: HashMap<ClientId, Responder> = HashMap::new();
 
         Self {

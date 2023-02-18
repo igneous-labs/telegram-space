@@ -1,12 +1,16 @@
-use log::{debug, trace, warn};
+use log::{debug, info, trace, warn};
 use std::{
     collections::HashMap,
     sync::mpsc::{Receiver, Sender},
     thread::{self, JoinHandle},
+    time::Duration,
 };
 
 use super::sender_service;
-use crate::protocol::{ClientId, InstanceId, LevelId, PlayerStateData};
+use crate::{
+    consts::{load_env_or, DEFAULT_SYNC_INTERVAL_MS},
+    protocol::{ClientId, InstanceId, LevelId, PlayerStateData},
+};
 use world_state::WorldState;
 
 mod world_state;
@@ -29,11 +33,17 @@ impl StateService {
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
+        let sync_interval_ms = load_env_or("SYNC_INTERVAL_MS", DEFAULT_SYNC_INTERVAL_MS);
+        info!(
+            "Initializing StateService: SYNC_INTERVAL_MS = {}",
+            sync_interval_ms
+        );
         let world_state = WorldState::new();
         let client_chat_user_id = HashMap::new();
 
         Self {
             thread_hdl: Self::spawn_service(
+                Duration::from_millis(sync_interval_ms),
                 world_state,
                 client_chat_user_id,
                 message_rx,
@@ -43,6 +53,7 @@ impl StateService {
     }
 
     fn spawn_service(
+        sync_interval: Duration,
         mut world_state: WorldState,
         mut client_chat_user_id: HashMap<ClientId, Vec<u8>>,
         message_rx: Receiver<Message>,
@@ -164,7 +175,7 @@ impl StateService {
                 }
             }
 
-            let instance_ids = world_state.get_instance_ids_to_sync();
+            let instance_ids = world_state.get_instance_ids_to_sync(&sync_interval);
             if !instance_ids.is_empty() {
                 debug!(
                     "Sending world instances #{:?} states to SenderService",
@@ -182,7 +193,10 @@ impl StateService {
                                         if client_chat_user_id.contains_key(client_id) {
                                             Some((
                                                 client_id.to_owned(),
-                                                client_chat_user_id.get(client_id).unwrap().to_owned(),
+                                                client_chat_user_id
+                                                    .get(client_id)
+                                                    .unwrap()
+                                                    .to_owned(),
                                             ))
                                         } else {
                                             None

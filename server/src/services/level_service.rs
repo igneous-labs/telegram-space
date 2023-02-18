@@ -7,7 +7,7 @@ use std::{
 
 use super::sender_service;
 use crate::{
-    consts::LEVEL_DATA_DIR,
+    consts::{load_env_or, DEFAULT_LEVEL_DATA_DIR},
     protocol::{ClientId, LevelId},
 };
 
@@ -26,7 +26,12 @@ impl LevelService {
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let levels: HashMap<LevelId, Vec<u8>> = Self::load_levels();
+        let level_data_dir = load_env_or("LEVE_DATA_DIR", DEFAULT_LEVEL_DATA_DIR.to_string());
+        info!(
+            "Initializing LevelService: LEVEL_DATA_DIR = {}",
+            level_data_dir
+        );
+        let levels: HashMap<LevelId, Vec<u8>> = Self::load_levels(&level_data_dir);
 
         Self {
             thread_hdl: Self::spawn_service(levels, message_rx, sender_service_tx),
@@ -34,12 +39,12 @@ impl LevelService {
     }
 
     // TODO: This function should load compressed level from data storage (TBD).
-    //       For now it just reads all files from LEVEL_DATA_DIR
-    fn load_levels() -> HashMap<LevelId, Vec<u8>> {
+    //       For now it just reads all files from level_data_dir
+    fn load_levels(level_data_dir: &str) -> HashMap<LevelId, Vec<u8>> {
         let mut levels: HashMap<LevelId, Vec<u8>> = HashMap::new();
 
         use std::io::Read;
-        for dir_entry in std::fs::read_dir(LEVEL_DATA_DIR).unwrap() {
+        for dir_entry in std::fs::read_dir(level_data_dir).unwrap() {
             if let Ok(dir_entry) = dir_entry {
                 let mut f = std::fs::File::open(&dir_entry.path()).expect("no file found");
                 let mut buffer = vec![

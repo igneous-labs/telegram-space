@@ -1,9 +1,9 @@
 use dotenv::dotenv;
-use log::{info, LevelFilter};
-use simple_logger::SimpleLogger;
+use log::info;
 use std::sync::mpsc::channel;
 
 mod envs;
+mod logger;
 mod protocol;
 mod services;
 
@@ -11,12 +11,7 @@ mod services;
 //       the max connection is kept at u16 max.
 fn main() {
     dotenv().ok();
-    SimpleLogger::new()
-        .with_level(LevelFilter::Off)
-        .with_module_level("telegram_space_server", LevelFilter::Debug)
-        .with_utc_timestamps()
-        .init()
-        .unwrap();
+    logger::init_logger();
 
     let (state_service_tx, state_service_rx) = channel();
     let (level_service_tx, level_service_rx) = channel();
@@ -27,6 +22,7 @@ fn main() {
     let receiver_service =
         // TODO: remove clone from state_service_tx
         services::ReceiverService::new(state_service_tx.clone(), level_service_tx, sender_service_tx);
+
     // DELETEME: temporarily setup testing instances
     state_service_tx
         .send(services::state_service::Message::CreateInstance(0, 0))

@@ -1,4 +1,5 @@
 # These are default values
 #PORT=1337
 #SYNC_INTERVAL_MS=40
-#LEVEL_DATA_DIR=./level-data
+#LEVEL_DATA_DIR="./level-data"
+#RUST_LOG="telegram_space_server=debug"

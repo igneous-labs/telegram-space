@@ -3,7 +3,7 @@ use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
 use std::sync::mpsc::channel;
 
-mod consts;
+mod envs;
 mod protocol;
 mod services;
 

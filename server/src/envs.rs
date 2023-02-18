@@ -7,7 +7,7 @@ pub const DEFAULT_SYNC_INTERVAL_MS: u64 = 40;
 pub const DEFAULT_LEVEL_DATA_DIR: &str = "./level-data";
 
 #[inline(always)]
-pub fn load_env_or<T: FromStr>(var: &str, default: T) -> T {
+pub fn parse_env_or<T: FromStr>(var: &str, default: T) -> T {
     env::var(var)
         .ok()
         .and_then(|v| v.parse::<T>().ok())

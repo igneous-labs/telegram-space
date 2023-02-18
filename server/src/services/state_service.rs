@@ -8,7 +8,7 @@ use std::{
 
 use super::sender_service;
 use crate::{
-    consts::{load_env_or, DEFAULT_SYNC_INTERVAL_MS},
+    envs::{parse_env_or, DEFAULT_SYNC_INTERVAL_MS},
     protocol::{ClientId, InstanceId, LevelId, PlayerStateData},
 };
 use world_state::WorldState;
@@ -33,7 +33,7 @@ impl StateService {
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let sync_interval_ms = load_env_or("SYNC_INTERVAL_MS", DEFAULT_SYNC_INTERVAL_MS);
+        let sync_interval_ms = parse_env_or("SYNC_INTERVAL_MS", DEFAULT_SYNC_INTERVAL_MS);
         info!(
             "Initializing StateService: SYNC_INTERVAL_MS = {}",
             sync_interval_ms

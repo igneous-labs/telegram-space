@@ -7,7 +7,7 @@ use std::{
 
 use super::{level_service, sender_service, state_service};
 use crate::{
-    consts::{load_env_or, DEFAULT_PORT},
+    envs::{parse_env_or, DEFAULT_PORT},
     protocol::{ClientId, IngressMessage},
 };
 
@@ -21,7 +21,7 @@ impl ReceiverService {
         level_service_tx: Sender<level_service::Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let port = load_env_or("PORT", DEFAULT_PORT);
+        let port = parse_env_or("PORT", DEFAULT_PORT);
         info!("Initializing ReceiverService: PORT = {}", port);
         let event_hub = simple_websockets::launch(port).expect("Failed to listen to port");
 

@@ -1,5 +1,6 @@
 use log::{debug, info, trace, warn};
 use std::{
+    env,
     collections::HashMap,
     sync::mpsc::{Receiver, Sender},
     thread::{self, JoinHandle},
@@ -7,7 +8,7 @@ use std::{
 
 use super::sender_service;
 use crate::{
-    consts::{load_env_or, DEFAULT_LEVEL_DATA_DIR},
+    envs::DEFAULT_LEVEL_DATA_DIR,
     protocol::{ClientId, LevelId},
 };
 
@@ -26,7 +27,7 @@ impl LevelService {
         message_rx: Receiver<Message>,
         sender_service_tx: Sender<sender_service::Message>,
     ) -> Self {
-        let level_data_dir = load_env_or("LEVE_DATA_DIR", DEFAULT_LEVEL_DATA_DIR.to_string());
+        let level_data_dir = env::var("LEVEL_DATA_DIR").unwrap_or(DEFAULT_LEVEL_DATA_DIR.to_string());
         info!(
             "Initializing LevelService: LEVEL_DATA_DIR = {}",
             level_data_dir

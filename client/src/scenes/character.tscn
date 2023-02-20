@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://b4o7d72albudw"]
+[gd_scene load_steps=14 format=3 uid="uid://b4o7d72albudw"]
 
 [ext_resource type="Texture2D" uid="uid://bce71fan5h7bp" path="res://assets/characters/Alex_16x16.png" id="1_2jict"]
 [ext_resource type="Script" path="res://src/scenes/character.gd" id="1_elxk6"]
+[ext_resource type="PackedScene" uid="uid://cchwmskqnphwa" path="res://src/scenes/components/speech_bubble_container.tscn" id="3_fho4w"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_gdc0p"]
 radius = 6.0
@@ -171,10 +172,21 @@ position = Vector2(0, -16)
 texture = ExtResource("1_2jict")
 hframes = 24
 vframes = 7
-frame = 24
+frame = 42
 metadata/_edit_lock_ = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 "": SubResource("AnimationLibrary_8oc3e")
 }
+
+[node name="SpeechBubbleContainer" parent="." instance=ExtResource("3_fho4w")]
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+offset_left = -40.5
+offset_top = -80.0
+offset_right = 40.5
+offset_bottom = -32.0
+grow_vertical = 2

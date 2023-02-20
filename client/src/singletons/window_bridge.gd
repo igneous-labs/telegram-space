@@ -1,10 +1,20 @@
 extends Node
 
-const MATRIX_ID_KEY = "matrix_id"
-const BODY_KEY = "body"
+signal received_window_message(message_type: MessageType, data: Dictionary)
 
-var _on_init_msg_ref = JavaScriptBridge.create_callback(Callable(self, "_on_init_msg"))
-var _on_msg_ref = JavaScriptBridge.create_callback(Callable(self, "_on_msg"))
+# NOTE: This indicates how data field should be decoded
+enum MessageType {
+    # data = { sender_id: String, body: String }
+    CHAT_MESSAGE = 0,
+}
+
+const MATRIX_ID_KEY := "matrix_id"
+const BODY_KEY := "body"
+
+var chat_user_id: String = ""
+
+var _on_init_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_init_msg"))
+var _on_msg_ref := JavaScriptBridge.create_callback(Callable(self, "_on_msg"))
 
 var _msg_port
 
@@ -13,7 +23,6 @@ func _ready():
     if window == null:
         return
     window.addEventListener("message", self._on_init_msg_ref)
-
 
 # Init msg schema
 # { matrix_id: string }
@@ -29,8 +38,8 @@ func _on_init_msg(args) -> void:
         or typeof(parsed[MATRIX_ID_KEY]) != TYPE_STRING:
             return
     
-    # TODO: send this to server
-    var _matrix_id = parsed[MATRIX_ID_KEY]
+    # TODO: send this to server (temporarily, this is done in loader to sync messaging order between PLAYER_CHAT_USER_ID and PLAYER_INSTANCE messages)
+    self.chat_user_id = parsed[MATRIX_ID_KEY]
     
     self._msg_port = msg_port
     self._msg_port.addEventListener("message", self._on_msg_ref)
@@ -51,6 +60,12 @@ func _on_msg(args) -> void:
         or typeof(parsed[MATRIX_ID_KEY]) != TYPE_STRING \
         or typeof(parsed[BODY_KEY]) != TYPE_STRING:
             return
-    # TODO: render message instead of echoing back to source
-    self._msg_port.postMessage(str(parsed[MATRIX_ID_KEY], ": ", parsed[BODY_KEY]))
-
+    # TODO: protocol for sending differnt types of messages
+    #       for now it's just simple chat_message that has sender_id
+    self.emit_signal(&"received_window_message",
+        MessageType.CHAT_MESSAGE,
+        {
+            "sender_id": parsed[MATRIX_ID_KEY],
+            "body": parsed[BODY_KEY],
+        }
+    )

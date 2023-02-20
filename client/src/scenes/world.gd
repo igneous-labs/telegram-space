@@ -49,9 +49,10 @@ func spawn_player(character_state: Dictionary) -> void:
     p.setup(character_state)
     self.add_child(p)
 
-func spawn_remote_player(client_id: int, character_state: Dictionary) -> void:
+func spawn_remote_player(client_id: int, character_state: Dictionary, chat_user_id: String) -> void:
     var r := RemotePlayerScene.instantiate()
     r.setup(client_id, character_state)
+    r.chat_user_id = chat_user_id
     self.add_child(r)
 
 func despawn_remote_players(client_ids: Array) -> void:
@@ -71,9 +72,7 @@ func handle_received_world_state(data: Dictionary) -> void:
         var remote_player_path := get_remote_player_path(client_id)
         if not self.has_node(remote_player_path):
             # Spawn case
-            # DELETEME
-            print("spawning remote player for client %s (matrix id: %s)" % [client_id, client_chat_user_ids[client_id]])
-            self.spawn_remote_player(client_id, world_state[client_id])
+            self.spawn_remote_player(client_id, world_state[client_id], client_chat_user_ids[client_id])
         else:
             # Update case
             # TODO: rubber banding

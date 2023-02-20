@@ -6,9 +6,6 @@
 [node name="Player" instance=ExtResource("1_yfm4p")]
 script = ExtResource("2_60fwp")
 
-[node name="Sprite2D" parent="." index="1"]
-frame = 42
-
 [node name="Camera2D" type="Camera2D" parent="." index="3"]
 position_smoothing_enabled = true
 drag_horizontal_enabled = true

@@ -11,7 +11,7 @@ mkdir -p ${BUILD_DIR}
 # NOTE: Workaround for: https://github.com/godotengine/godot/issues/72360
 mkdir -p ${BASE_DIR}/.godot/{imported,editor}
 
-${GODOT} --headless --export-debug "${TARGET}" ${BASE_DIR}/project.godot
+${GODOT} --headless --export-release "${TARGET}" ${BASE_DIR}/project.godot
 
 # NOTE: Workaround for first build always failing with half baked artifacts
-${GODOT} --headless --export-debug "${TARGET}" ${BASE_DIR}/project.godot
+${GODOT} --headless --export-release "${TARGET}" ${BASE_DIR}/project.godot

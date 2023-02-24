@@ -46,7 +46,7 @@ func update_player_state(input_vector: Vector2):
         self.character_status = Common.CharacterStatus.WALK
         var dir = Common.vec_to_dir(input_vector)
         if dir != Common.Direction.NONE:
-            self.character_direction = dir
+            self.update_character_direction(dir)
     else:
         self.character_status = Common.CharacterStatus.IDLE
 

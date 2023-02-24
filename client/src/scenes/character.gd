@@ -6,6 +6,7 @@ const SpeechBubble := preload("res://src/scenes/components/speech_bubble.tscn")
 
 @export var character_direction: Common.Direction
 @export var character_status: Common.CharacterStatus
+var is_right: bool = true;
 var chat_user_id: String = "":
     # DELETEME
     set(id):
@@ -16,13 +17,20 @@ func _ready() -> void:
     WindowBridge.received_window_message.connect(self.handle_window_message)
 
 func update_animation() -> void:
-    $AnimationPlayer.play(&"%s-%s" % [
+    $CharTexture.scale.x = -1 if self.is_right else 1
+    $CharTexture/AnimationPlayer.play(&"%s" % [
         Common.char_status_to_strn(self.character_status),
-        Common.dir_to_strn(self.character_direction),
     ])
+    
+func update_character_direction(new_dir: Common.Direction) -> void:
+    self.character_direction = new_dir
+    if self.character_direction == Common.Direction.LEFT:
+        self.is_right = false
+    elif self.character_direction == Common.Direction.RIGHT:
+        self.is_right = true
 
 func update_character_state(character_state: Dictionary) -> void:
-    self.character_direction = character_state.direction
+    self.update_character_direction(character_state.direction)
     self.character_status = character_state.status
     self.position = character_state.position
     self.update_animation()

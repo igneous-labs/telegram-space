@@ -1,96 +1,28 @@
-[gd_scene load_steps=14 format=3 uid="uid://b4o7d72albudw"]
+[gd_scene load_steps=8 format=3 uid="uid://b4o7d72albudw"]
 
-[ext_resource type="Texture2D" uid="uid://bce71fan5h7bp" path="res://assets/characters/Alex_16x16.png" id="1_2jict"]
 [ext_resource type="Script" path="res://src/scenes/character.gd" id="1_elxk6"]
+[ext_resource type="Texture2D" uid="uid://6p7fw5ahhl8h" path="res://assets/characters/spritesheet.png" id="2_h2ejf"]
 [ext_resource type="PackedScene" uid="uid://cchwmskqnphwa" path="res://src/scenes/components/speech_bubble_container.tscn" id="3_fho4w"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_gdc0p"]
 radius = 6.0
 height = 12.0
 
-[sub_resource type="Animation" id="Animation_0vayr"]
-resource_name = "idle-down"
-length = 1.8
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2, 1.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [42, 43, 44, 45, 46, 47]
-}
-
 [sub_resource type="Animation" id="Animation_q2nlg"]
 resource_name = "idle-left"
-length = 1.8
+length = 1.5
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("CharTexture/Sprite2D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2, 1.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 1,
-"values": [36, 37, 38, 39, 40, 41]
-}
-
-[sub_resource type="Animation" id="Animation_lwcgx"]
-resource_name = "idle-right"
-length = 1.8
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2, 1.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [24, 25, 26, 27, 28, 29]
-}
-
-[sub_resource type="Animation" id="Animation_ntikt"]
-resource_name = "idle-up"
-length = 1.8
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2, 1.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [30, 31, 32, 33, 34, 35]
-}
-
-[sub_resource type="Animation" id="Animation_1uok4"]
-resource_name = "walk-down"
-length = 0.6
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [66, 67, 68, 69, 70, 71]
+"values": [0, 1]
 }
 
 [sub_resource type="Animation" id="Animation_2evbo"]
@@ -100,60 +32,20 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/path = NodePath("CharTexture/Sprite2D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
-"values": [60, 61, 62, 63, 64, 65]
-}
-
-[sub_resource type="Animation" id="Animation_w0p2b"]
-resource_name = "walk-right"
-length = 0.6
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [48, 49, 50, 51, 52, 53]
-}
-
-[sub_resource type="Animation" id="Animation_uf5ak"]
-resource_name = "walk-up"
-length = 0.6
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [54, 55, 56, 57, 58, 59]
+"values": [2, 3, 4, 5]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_8oc3e"]
 _data = {
-"idle-down": SubResource("Animation_0vayr"),
-"idle-left": SubResource("Animation_q2nlg"),
-"idle-right": SubResource("Animation_lwcgx"),
-"idle-up": SubResource("Animation_ntikt"),
-"walk-down": SubResource("Animation_1uok4"),
-"walk-left": SubResource("Animation_2evbo"),
-"walk-right": SubResource("Animation_w0p2b"),
-"walk-up": SubResource("Animation_uf5ak")
+"idle": SubResource("Animation_q2nlg"),
+"walk": SubResource("Animation_2evbo")
 }
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
@@ -166,20 +58,6 @@ position = Vector2(0, -5.5)
 shape = SubResource("CapsuleShape2D_gdc0p")
 metadata/_edit_lock_ = true
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture_filter = 1
-position = Vector2(0, -16)
-texture = ExtResource("1_2jict")
-hframes = 24
-vframes = 7
-frame = 42
-metadata/_edit_lock_ = true
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_8oc3e")
-}
-
 [node name="SpeechBubbleContainer" parent="." instance=ExtResource("3_fho4w")]
 anchors_preset = 15
 anchor_left = 0.0
@@ -190,3 +68,20 @@ offset_top = -80.0
 offset_right = 40.5
 offset_bottom = -32.0
 grow_vertical = 2
+
+[node name="CharTexture" type="Node2D" parent="."]
+metadata/_edit_lock_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="CharTexture"]
+texture_filter = 1
+position = Vector2(0, -9)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_h2ejf")
+hframes = 6
+metadata/_edit_lock_ = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CharTexture"]
+root_node = NodePath("../..")
+libraries = {
+"": SubResource("AnimationLibrary_8oc3e")
+}

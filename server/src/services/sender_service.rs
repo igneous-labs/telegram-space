@@ -64,20 +64,20 @@ impl SenderService {
                             trace!("sending world state to client #{}", dest_client_id);
                             Self::try_send(
                                 dest_client_id,
-                                &clients,
+                                &mut clients,
                                 EgressMessage::WorldState(
                                     world_state_data,
                                     instance_chat_user_ids.clone(),
                                 ),
                             )
-                            .unwrap_or_else(|err| warn!("{}", err));
+                            .unwrap_or_else(|err| warn!("SyncWorldState failed: {}", err));
                         }
                     }
                     Message::Register(client_id, responder) => {
                         debug!("Registering client #{}", client_id);
                         clients.insert(client_id, responder);
-                        Self::try_send(&client_id, &clients, EgressMessage::Acknowledge(client_id))
-                            .unwrap_or_else(|err| warn!("{}", err));
+                        Self::try_send(&client_id, &mut clients, EgressMessage::Acknowledge(client_id))
+                            .unwrap_or_else(|err| warn!("Register failed: {}", err));
                     }
                     Message::Deregister(client_id) => {
                         debug!("Deregistering client #{}", client_id);
@@ -90,28 +90,28 @@ impl SenderService {
                         );
                         Self::try_send(
                             &client_id,
-                            &clients,
+                            &mut clients,
                             EgressMessage::LevelData(level_id, level_data),
                         )
-                        .unwrap_or_else(|err| warn!("{}", err));
+                        .unwrap_or_else(|err| warn!("SendLevel failed: {}", err));
                     }
                     Message::PlayerInstanceAcknowledge(client_id, level_id) => {
                         debug!("Sending level id #{} to client #{}", level_id, client_id);
                         Self::try_send(
                             &client_id,
-                            &clients,
+                            &mut clients,
                             EgressMessage::PlayerInstanceAcknowledge(level_id),
                         )
-                        .unwrap_or_else(|err| warn!("{}", err));
+                        .unwrap_or_else(|err| warn!("PlayerInstanceAcknowledge failed: {}", err));
                     }
                     Message::PlayerChatUserIdAcknowledge(client_id) => {
                         debug!("Acknowledging client #{}'s chat_user_id", client_id);
                         Self::try_send(
                             &client_id,
-                            &clients,
+                            &mut clients,
                             EgressMessage::PlayerChatUserIdAcknowledge,
                         )
-                        .unwrap_or_else(|err| warn!("{}", err));
+                        .unwrap_or_else(|err| warn!("PlayerChatUserIdAcknowledge failed: {}", err));
                     }
                 }
             }
@@ -125,14 +125,15 @@ impl SenderService {
     #[inline(always)]
     fn try_send(
         client_id: &ClientId,
-        clients: &HashMap<ClientId, Responder>,
+        clients: &mut HashMap<ClientId, Responder>,
         message: EgressMessage,
     ) -> Result<(), String> {
         if let Some(responder) = clients.get(client_id) {
             if responder.send(WebsocketMessage::Binary((&message).into())) {
                 Ok(())
             } else {
-                Err(format!("Client #{} disconnected, ignoring request", client_id).into())
+                clients.remove(&client_id);
+                Err(format!("Client #{} disconnected, cleaning up and ignoring request", client_id).into())
             }
         } else {
             Err(format!("Could not find client #{}, ignoring request", client_id).into())

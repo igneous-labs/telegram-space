@@ -52,10 +52,9 @@ pub fn init_logger() {
         .rotate(
             Criterion::AgeOrSize(Age::Day, MAX_LOG_FILE_SIZE_BYTES),
             Naming::Timestamps,
-            // TODO: cap the max # of log files in prod
-            //       for now, don't cleanup
-            // Cleanup::KeepLogFiles(20),
-            Cleanup::Never,
+            // NOTE: cap the max # of log files in prod
+            Cleanup::KeepLogFiles(20),
+            //Cleanup::Never,
         )
         .write_mode(WriteMode::BufferAndFlush)
         .start()

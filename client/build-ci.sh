@@ -3,7 +3,7 @@
 readonly BASE_DIR=$(dirname $(readlink -f "$0"))
 readonly BUILD_DIR="${BASE_DIR}/exports"
 
-readonly GODOT="/opt/godot/Godot_v4.0-stable_linux.x86_64"
+readonly GODOT="/opt/godot/Godot_v4.0.1-stable_linux.x86_64"
 readonly TARGET="Web"
 
 mkdir -p ${BUILD_DIR}

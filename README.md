@@ -1,8 +1,8 @@
 # Telegram Space
 ## Dependencies
- - godot 4.0 stable
-   - https://godotengine.org/article/godot-4-0-sets-sail/
-   - https://downloads.tuxfamily.org/godotengine/4.0
+ - godot 4.0.1 stable
+   - https://godotengine.org/article/maintenance-release-godot-4-0-1/
+   - https://downloads.tuxfamily.org/godotengine/4.0.1
    - after downloading and installing Godot, open a project in Godot, in top menu select `Editor -> Manage Export templates...` and click `Download and install` to install the export templates
 
  - rust 1.66.1 (90743e729 2023-01-10)

@@ -81,6 +81,8 @@ impl StateService {
                         debug!("Removing client #{} from world state", client_id);
                         if world_state.has_client(&client_id) {
                             world_state.remove_player_state(&client_id);
+                        } else {
+                            warn!("Failed to find client #{} in world state, ignoring", client_id);
                         }
                         debug!(
                             "Removing client #{} from client_chat_user_id map",
@@ -88,6 +90,8 @@ impl StateService {
                         );
                         if client_chat_user_id.contains_key(&client_id) {
                             client_chat_user_id.remove(&client_id);
+                        } else {
+                            warn!("Failed to find client #{} in client_chat_user_id, ignoring", client_id);
                         }
                     }
                     Message::UpdatePlayerInstance(client_id, instance_id) => {
@@ -132,7 +136,13 @@ impl StateService {
                         }
                     }
                     Message::UpdatePlayerChatUserId(client_id, chat_user_id) => {
-                        debug!(
+                        //debug!(
+                        //    "Updating client #{}'s chat user id to '{}'",
+                        //    client_id,
+                        //    String::from_utf8(chat_user_id.clone()).unwrap()
+                        //);
+                        // NOTE: temporarily setting log level to info
+                        info!(
                             "Updating client #{}'s chat user id to '{}'",
                             client_id,
                             String::from_utf8(chat_user_id.clone()).unwrap()
